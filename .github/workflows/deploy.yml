@@ -32,8 +32,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build web package
-        run: pnpm 
+      - name: Build packages
+        run: pnpm run build
 
       - name: Deploy 
         run: pnpm run deploy:all

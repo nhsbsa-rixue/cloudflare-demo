@@ -10,7 +10,7 @@
     "dev": "pnpm -r --parallel dev",
     "dev:backend": "pnpm --filter @cloudflare-demo/backend dev",
     "dev:frontend": "pnpm --filter @cloudflare-demo/frontend dev",
-    "build": "pnpm --filter @cloudflare-demo/frontend build",
+    "build": "pnpm -r build",
     "deploy:frontend": "pnpm --filter @cloudflare-demo/frontend run deploy",
     "deploy:backend": "pnpm --filter @cloudflare-demo/backend run deploy",
     "deploy:all": "pnpm run deploy:frontend && pnpm run deploy:backend",
