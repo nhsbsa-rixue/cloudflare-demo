@@ -33,16 +33,10 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build web package
-        run: pnpm --filter @cloudflare-demo/web build
+        run: pnpm 
 
-      - name: Deploy web (Cloudflare Pages)
-        run: pnpm run deploy:web
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-
-      - name: Deploy worker (Cloudflare Workers)
-        run: pnpm run deploy:worker
+      - name: Deploy 
+        run: pnpm run deploy:all
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
