@@ -1,0 +1,4 @@
+# Cloudflare Pages redirects file
+# See: https://developers.cloudflare.com/pages/configuration/redirects/
+# Format: /source /destination [status_code]
+# Example: /old-page /new-page 301

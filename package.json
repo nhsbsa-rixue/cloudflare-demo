@@ -1,0 +1,26 @@
+{
+  "name": "cloudflare-demo",
+  "description": "Cloudflare Workers + SvelteKit monorepo",
+  "version": "1.0.1",
+  "private": true,
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "scripts": {
+    "dev": "pnpm -r --parallel dev",
+    "dev:worker": "pnpm --filter @cloudflare-demo/worker dev",
+    "dev:web": "pnpm --filter @cloudflare-demo/web dev",
+    "build": "pnpm --filter @cloudflare-demo/web build",
+    "preview": "pnpm --filter @cloudflare-demo/web preview",
+    "check": "pnpm --filter @cloudflare-demo/web check",
+    "test": "pnpm -r test",
+    "test:coverage": "pnpm -r test:coverage",
+    "lint": "biome check .",
+    "audit": "pnpm audit",
+    "format": "biome format --write .",
+    "quality": "pnpm lint && pnpm test:coverage && pnpm audit"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.2.0"
+  }
+}

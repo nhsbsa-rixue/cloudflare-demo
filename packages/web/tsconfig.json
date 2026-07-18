@@ -1,0 +1,26 @@
+{
+  // This file extends the auto-generated .svelte-kit/tsconfig.json (created on first build/sync).
+  // Run `pnpm check` (svelte-kit sync) to generate the base config before your IDE can resolve paths.
+  "extends": "./.svelte-kit/tsconfig.json",
+  "compilerOptions": {
+    "strict": true,
+    "moduleResolution": "bundler",
+    "verbatimModuleSyntax": true,
+    "noUncheckedIndexedAccess": true,
+    "allowJs": true,
+    "checkJs": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "target": "ESNext",
+    "module": "ESNext"
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.js",
+    "src/**/*.svelte",
+    "test-setup/**/*.ts",
+    "vite.config.ts"
+  ]
+}

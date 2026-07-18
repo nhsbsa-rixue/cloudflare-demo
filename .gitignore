@@ -1,0 +1,26 @@
+# Coverage directories
+coverage/
+
+# Dependency directories
+node_modules/
+
+# Optional pnpm cache directory
+.pnpm-store
+pnpm-debug.log*
+
+# dotenv environment variables file
+.env
+
+# visual studio code
+.history/
+launch.json
+.vscode/
+
+
+# Build output
+dist
+
+# svelte-kit build output
+.svelte-kit
+
+.wrangler
