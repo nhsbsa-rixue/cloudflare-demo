@@ -47,14 +47,14 @@
   "files": {
     "ignoreUnknown": true,
     "includes": [
-      "packages/*/src/**/*.js",
-      "packages/*/src/**/*.ts",
-      "packages/*/test/**/*.ts",
-      "packages/*/test-setup/**/*.ts",
-      "packages/*/vite.config.ts",
-      "packages/*/vitest.config.ts",
-      "packages/*/svelte.config.js",
-      "packages/*/package.json",
+      "modules/*/src/**/*.js",
+      "modules/*/src/**/*.ts",
+      "modules/*/test/**/*.ts",
+      "modules/*/test-setup/**/*.ts",
+      "modules/*/vite.config.ts",
+      "modules/*/vitest.config.ts",
+      "modules/*/svelte.config.js",
+      "modules/*/package.json",
       "package.json",
       "pnpm-workspace.yaml"
     ]

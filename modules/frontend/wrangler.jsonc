@@ -6,7 +6,13 @@
   // nodejs_als is required for SvelteKit's AsyncLocalStorage usage (SSR context propagation).
   "compatibility_flags": ["nodejs_als"],
   // Build output directory for Cloudflare Pages
-  "pages_build_output_dir": ".svelte-kit/cloudflare"
+  "pages_build_output_dir": ".svelte-kit/cloudflare",
+  "services": [
+    {
+      "binding": "WORKER",
+      "service": "cloudflare-demo-worker"
+    }
+  ]
 
   // --- Cloudflare Bindings (uncomment and fill in as needed) ---
 

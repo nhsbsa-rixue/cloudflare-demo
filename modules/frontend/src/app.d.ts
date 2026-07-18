@@ -21,7 +21,9 @@ declare global {
        *   MY_KV: KVNamespace;
        *   MY_DB: D1Database;
        */
-      env: Record<string, unknown>;
+      env: Record<string, unknown> & {
+        WORKER?: Fetcher;
+      };
 
       /** Schedule work to outlive the response via the Cloudflare execution context. */
       context: {

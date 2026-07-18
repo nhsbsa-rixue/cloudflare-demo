@@ -1,10 +1,10 @@
 {
-  "name": "@cloudflare-demo/web",
+  "name": "@cloudflare-demo/frontend",
   "version": "0.1.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite dev",
+    "dev": "node ./scripts/dev.mjs",
     "build": "vite build",
     "deploy": "wrangler pages deploy .svelte-kit/cloudflare --project-name cloudflare-demo-web",
     "preview": "wrangler pages dev .svelte-kit/cloudflare",
@@ -12,7 +12,9 @@
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
     "test": "vitest run --config vitest.config.ts",
     "test:watch": "vitest --config vitest.config.ts",
-    "test:coverage": "vitest run --config vitest.config.ts --coverage"
+    "test:coverage": "vitest run --config vitest.config.ts --coverage",
+    "lint": "biome check .",
+    "format": "biome format --write ."
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.0.0",

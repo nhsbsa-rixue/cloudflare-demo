@@ -1,14 +1,13 @@
 {
-  "name": "@cloudflare-demo/worker",
+  "name": "@cloudflare-demo/backend",
   "version": "1.0.1",
   "description": "Cloudflare Worker — API backend",
-  "engines": {
-    "node": ">=20.9.0"
-  },
   "type": "module",
   "scripts": {
     "dev": "wrangler dev",
+    "build": "wrangler deploy --dry-run",
     "deploy": "wrangler deploy",
+    "check": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
