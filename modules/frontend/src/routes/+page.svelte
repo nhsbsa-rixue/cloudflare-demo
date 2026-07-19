@@ -1,8 +1,12 @@
 <script lang="ts">
-  import type { PageData } from './$types';
+  import type { ActionData, PageData } from './$types';
 
-  let { data }: { data: PageData } = $props();
+  let { data, form }: { data: PageData; form: ActionData } = $props();
   const title = 'Cloudflare Demo';
+
+  const apiResult = $derived(form?.greeting ?? data.greeting);
+  const apiError = $derived(form?.error ?? data.error);
+  const submittedUsername = $derived(form?.username ?? '');
 </script>
 
 <svelte:head>
@@ -26,11 +30,32 @@
         Worker API Response
       </h2>
 
-      {#if data.error}
-        <p class="text-sm text-red-600 dark:text-red-400 font-mono">{data.error}</p>
-      {:else if data.greeting}
-        <p class="text-xl font-semibold text-gray-900 dark:text-gray-50">{data.greeting.message}</p>
-        <p class="text-sm text-gray-500 dark:text-gray-400 font-mono">{data.greeting.timestamp}</p>
+      <form method="POST" class="space-y-3">
+        <label for="username" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Username</label>
+        <div class="flex gap-3">
+          <input
+            id="username"
+            name="username"
+            type="text"
+            required
+            value={submittedUsername}
+            placeholder="Enter your name"
+            class="flex-1 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-950 px-3 py-2 text-gray-900 dark:text-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
+          />
+          <button
+            type="submit"
+            class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
+          >
+            Send
+          </button>
+        </div>
+      </form>
+
+      {#if apiError}
+        <p class="text-sm text-red-600 dark:text-red-400 font-mono">{apiError}</p>
+      {:else if apiResult}
+        <p class="text-xl font-semibold text-gray-900 dark:text-gray-50">{apiResult.message}</p>
+        <p class="text-sm text-gray-500 dark:text-gray-400 font-mono">{apiResult.timestamp}</p>
       {/if}
     </div>
 

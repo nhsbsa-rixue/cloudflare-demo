@@ -2,7 +2,8 @@ import type { Env } from './types';
 
 const CORS_HEADERS: HeadersInit = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, OPTIONS',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
   'Content-Type': 'application/json'
 };
 
@@ -16,14 +17,34 @@ export default {
       return new Response(null, { status: 204, headers: CORS_HEADERS });
     }
 
-    if (pathname === '/api/hello' && method === 'GET') {
+    if (pathname === '/api/hello' && method === 'POST') {
+      let body: unknown;
+      try {
+        body = await request.json();
+      } catch {
+        return Response.json({ error: 'Invalid JSON body' }, { status: 400, headers: CORS_HEADERS });
+      }
+
+      const username =
+        typeof body === 'object' && body !== null && 'username' in body && typeof body.username === 'string'
+          ? body.username.trim()
+          : '';
+
+      if (!username) {
+        return Response.json({ error: 'username is required' }, { status: 400, headers: CORS_HEADERS });
+      }
+
       return Response.json(
         {
-          message: 'Hello from Cloudflare Worker!',
+          message: `hello ${username} welcome to this, the backend api is working`,
           timestamp: new Date().toISOString()
         },
         { headers: CORS_HEADERS }
       );
+    }
+
+    if (pathname === '/api/hello') {
+      return Response.json({ error: 'Method Not Allowed' }, { status: 405, headers: CORS_HEADERS });
     }
 
     return Response.json({ error: 'Not Found' }, { status: 404, headers: CORS_HEADERS });
