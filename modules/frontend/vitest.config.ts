@@ -1,3 +1,4 @@
+import path from 'node:path';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vitest/config';
@@ -10,7 +11,11 @@ export default defineConfig({
 
   resolve: {
     // Use browser exports from Svelte so mount() is available in tests
-    conditions: ['browser']
+    conditions: ['browser'],
+    // Add alias for $lib so imports resolve correctly in test environment
+    alias: {
+      $lib: path.resolve('./src/lib')
+    }
   },
 
   test: {

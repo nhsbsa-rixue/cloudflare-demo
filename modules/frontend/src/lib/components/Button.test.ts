@@ -1,22 +1,13 @@
 import { render, screen } from '@testing-library/svelte';
 import { userEvent } from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
+// Note: This test file is deprecated. Test the UI button directly in src/lib/components/ui/button/button.test.ts
 import Button from './Button.svelte';
 
-describe('Button', () => {
+describe('Button (Legacy Re-export)', () => {
   it('renders with the given label', () => {
     render(Button, { label: 'Click me' });
     expect(screen.getByRole('button', { name: 'Click me' })).toBeInTheDocument();
-  });
-
-  it('applies primary variant classes by default', () => {
-    render(Button, { label: 'Primary' });
-    expect(screen.getByRole('button')).toHaveClass('bg-blue-600');
-  });
-
-  it('applies secondary variant classes', () => {
-    render(Button, { label: 'Secondary', variant: 'secondary' });
-    expect(screen.getByRole('button')).toHaveClass('bg-gray-200');
   });
 
   it('is disabled when the disabled prop is true', () => {

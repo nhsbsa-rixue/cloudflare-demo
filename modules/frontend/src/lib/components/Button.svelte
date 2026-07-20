@@ -1,33 +1,19 @@
+<!-- This component is deprecated. Use $lib/components/ui instead. -->
 <script lang="ts">
-  type Variant = 'primary' | 'secondary' | 'ghost';
-  type ButtonType = 'button' | 'submit' | 'reset';
+  import UIButton from '$lib/components/ui/button/button.svelte';
 
   interface Props {
-    label: string;
-    variant?: Variant;
+    label?: string;
+    variant?: 'primary' | 'secondary' | 'dark' | 'ghost';
+    size?: 'sm' | 'md' | 'lg' | 'pill';
     disabled?: boolean;
-    type?: ButtonType;
+    type?: 'button' | 'submit' | 'reset';
+    href?: string;
     onclick?: (event: MouseEvent) => void;
+    class?: string;
   }
 
-  const variantClasses: Record<Variant, string> = {
-    primary: 'bg-blue-600 hover:bg-blue-700 text-white',
-    secondary:
-      'bg-gray-200 hover:bg-gray-300 text-gray-900 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-100',
-    ghost: 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
-  };
-
-  let { label, variant = 'primary', disabled = false, type = 'button', onclick }: Props = $props();
+  let { label, variant, size, disabled, type, href, onclick, class: className }: Props = $props();
 </script>
 
-<button
-  {type}
-  {disabled}
-  {onclick}
-  class="inline-flex items-center justify-center px-4 py-2 rounded-md font-medium text-sm transition-colors
-         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500
-         disabled:opacity-50 disabled:pointer-events-none
-         {variantClasses[variant]}"
->
-  {label}
-</button>
+<UIButton {label} {variant} {size} {disabled} {type} {href} {onclick} class={className} />

@@ -1,5 +1,9 @@
 <script lang="ts">
   import type { ActionData, PageData } from './$types';
+  import { Button } from '$lib/components/ui/button/index.js';
+  import { Input } from '$lib/components/ui/input/index.js';
+  import { Card, CardContent, CardHeader } from '$lib/components/ui/card/index.js';
+  import { Heading, Lead, Text } from '$lib/components/ui/typography/index.js';
 
   let { data, form }: { data: PageData; form: ActionData } = $props();
   const title = 'Cloudflare Demo';
@@ -14,68 +18,77 @@
   <meta name="description" content="A SvelteKit app deployed on Cloudflare Pages with edge SSR." />
 </svelte:head>
 
-<main class="min-h-screen flex flex-col items-center justify-center p-8 bg-white dark:bg-gray-950">
-  <div class="max-w-2xl w-full space-y-8 text-center">
-    <h1 class="text-4xl font-bold tracking-tight text-gray-900 dark:text-gray-50">
-      Welcome to <span class="text-brand-600">{title}</span>
-    </h1>
+<!-- Hero Tile -->
+<section class="w-full min-h-screen flex flex-col items-center justify-center px-spacing-lg py-spacing-section bg-canvas-parchment">
+  <div class="max-w-4xl w-full space-y-8 text-center">
+    <Heading level={1} class="text-ink">
+      Welcome to <span class="text-primary">{title}</span>
+    </Heading>
 
-    <p class="text-lg text-gray-600 dark:text-gray-400">
+    <Lead class="text-ink-muted-80">
       SvelteKit · Cloudflare Pages · Edge SSR · Tailwind CSS v4
-    </p>
+    </Lead>
 
-    <!-- Worker API response card -->
-    <div class="rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 p-6 text-left space-y-3">
-      <h2 class="text-sm font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-        Worker API Response
-      </h2>
+    <!-- Worker API Card -->
+    <Card variant="utility" class="mx-auto max-w-2xl text-left space-y-4">
+      <CardHeader>
+        <Text class="text-sm font-semibold uppercase tracking-wider text-ink-muted-48">
+          Worker API Response
+        </Text>
+      </CardHeader>
 
-      <form method="POST" class="space-y-3">
-        <label for="username" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Username</label>
-        <div class="flex gap-3">
-          <input
-            id="username"
-            name="username"
-            type="text"
-            required
-            value={submittedUsername}
-            placeholder="Enter your name"
-            class="flex-1 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-950 px-3 py-2 text-gray-900 dark:text-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
-          />
-          <button
-            type="submit"
-            class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
-          >
-            Send
-          </button>
-        </div>
-      </form>
+      <CardContent class="space-y-4">
+        <form method="POST" class="space-y-4">
+          <div>
+            <label for="username" class="block text-sm font-medium text-ink mb-2">
+              Username
+            </label>
+            <div class="flex gap-3">
+              <Input
+                id="username"
+                name="username"
+                type="text"
+                required
+                value={submittedUsername}
+                placeholder="Enter your name"
+              />
+              <Button type="submit" size="md" variant="primary">
+                Send
+              </Button>
+            </div>
+          </div>
+        </form>
 
-      {#if apiError}
-        <p class="text-sm text-red-600 dark:text-red-400 font-mono">{apiError}</p>
-      {:else if apiResult}
-        <p class="text-xl font-semibold text-gray-900 dark:text-gray-50">{apiResult.message}</p>
-        <p class="text-sm text-gray-500 dark:text-gray-400 font-mono">{apiResult.timestamp}</p>
-      {/if}
-    </div>
+        {#if apiError}
+          <Text class="text-sm text-red-600 font-mono">{apiError}</Text>
+        {:else if apiResult}
+          <div class="space-y-2">
+            <Text class="text-xl font-semibold text-ink">{apiResult.message}</Text>
+            <Text class="text-sm text-ink-muted-48 font-mono">{apiResult.timestamp}</Text>
+          </div>
+        {/if}
+      </CardContent>
+    </Card>
 
+    <!-- CTA Buttons -->
     <div class="flex flex-wrap gap-4 justify-center pt-4">
-      <a
+      <Button
         href="https://svelte.dev/docs/kit"
-        class="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2"
         target="_blank"
         rel="noopener noreferrer"
-      >
-        SvelteKit Docs
-      </a>
-      <a
+        label="SvelteKit Docs"
+        variant="primary"
+        size="lg"
+      />
+      <Button
         href="https://developers.cloudflare.com/pages"
-        class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
         target="_blank"
         rel="noopener noreferrer"
-      >
-        Cloudflare Pages
-      </a>
+        label="Cloudflare Pages"
+        variant="secondary"
+        size="lg"
+      />
     </div>
   </div>
-</main>
+</section>
+

@@ -1,31 +1,133 @@
 /* Tailwind CSS v4 — CSS-first configuration (no tailwind.config.js needed).
-   Customise design tokens below using @theme.
+   Apple-design aesthetic with tokens from .github/prompts/DESIGN.md
    See: https://tailwindcss.com/docs/theme */
 
 @import "tailwindcss";
 
 @theme {
-  /* Brand colour tokens — override as needed */
-  --color-brand-50: oklch(97% 0.02 250);
-  --color-brand-100: oklch(93% 0.05 250);
-  --color-brand-500: oklch(60% 0.2 250);
-  --color-brand-600: oklch(54% 0.22 250);
-  --color-brand-700: oklch(48% 0.22 250);
+  /* Colors — Apple Design System */
+  /* Brand & Accent */
+  --color-primary: #0066cc;
+  --color-primary-focus: #0071e3;
+  --color-primary-on-dark: #2997ff;
+
+  /* Surface */
+  --color-canvas: #ffffff;
+  --color-canvas-parchment: #f5f5f7;
+  --color-surface-pearl: #fafafc;
+  --color-surface-tile-1: #272729;
+  --color-surface-tile-2: #2a2a2c;
+  --color-surface-tile-3: #252527;
+  --color-surface-black: #000000;
+  --color-surface-chip-translucent: #d2d2d7;
+
+  /* Text */
+  --color-ink: #1d1d1f;
+  --color-body: #1d1d1f;
+  --color-body-on-dark: #ffffff;
+  --color-body-muted: #cccccc;
+  --color-ink-muted-80: #333333;
+  --color-ink-muted-48: #7a7a7a;
+
+  /* Hairlines & Borders */
+  --color-divider-soft: #f0f0f0;
+  --color-hairline: #e0e0e0;
+
+  /* Radius */
+  --radius-xs: 5px;
+  --radius-sm: 8px;
+  --radius-md: 11px;
+  --radius-lg: 18px;
+  --radius-pill: 9999px;
+  --radius-full: 9999px;
+
+  /* Spacing */
+  --spacing-xxs: 4px;
+  --spacing-xs: 8px;
+  --spacing-sm: 12px;
+  --spacing-md: 17px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-xxl: 48px;
+  --spacing-section: 80px;
 
   /* Typography */
-  --font-sans: ui-sans-serif, system-ui, sans-serif;
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+  --font-display: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
   --font-mono: ui-monospace, "Cascadia Code", monospace;
+
+  /* Shadows */
+  --shadow-product: 0 3px 5px 0 rgba(0, 0, 0, 0.22), 0 30px 30px 0 rgba(0, 0, 0, 0.15);
 }
 
-/* Base reset */
+/* Base reset & typography */
 *,
 *::before,
 *::after {
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   font-family: var(--font-sans);
   margin: 0;
+  background-color: rgb(var(--color-canvas));
+  color: rgb(var(--color-body));
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Typography: Negative letter-spacing at display sizes */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  margin: 0;
+}
+
+h1 {
+  font-size: 56px;
+  line-height: 1.07;
+  letter-spacing: -0.28px;
+}
+
+h2 {
+  font-size: 40px;
+  line-height: 1.1;
+  letter-spacing: 0;
+}
+
+h3 {
+  font-size: 34px;
+  line-height: 1.47;
+  letter-spacing: -0.374px;
+}
+
+p {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.47;
+  letter-spacing: -0.374px;
+}
+
+a {
+  color: rgb(var(--color-primary));
+  text-decoration: none;
+  transition: color 150ms ease-out;
+}
+
+a:hover {
+  color: rgb(var(--color-primary-focus));
+}
+
+button {
+  font-family: var(--font-sans);
+  cursor: pointer;
 }
