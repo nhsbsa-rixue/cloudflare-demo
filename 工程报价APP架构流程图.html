@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <title>AI制造采购平台 - Level 3 架构与流程图</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.1/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg: #050b16;
+      --bg-soft: #0b1630;
+      --panel: rgba(11, 25, 54, 0.82);
+      --panel-strong: rgba(9, 20, 43, 0.96);
+      --border: rgba(114, 169, 255, 0.24);
+      --accent: #6eb6ff;
+      --accent-strong: #2b7fff;
+      --accent2: #8fd8ff;
+      --text: #eef5ff;
+      --muted: #9db2d3;
+      --shadow: 0 24px 60px rgba(0, 8, 24, 0.45);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top left, rgba(70, 129, 255, 0.24), transparent 30%),
+        radial-gradient(circle at 85% 20%, rgba(69, 203, 255, 0.18), transparent 24%),
+        linear-gradient(180deg, #040914 0%, #07101d 34%, #091428 100%);
+      color: var(--text);
+      font-family: "PingFang SC", "SF Pro Display", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, sans-serif;
+      padding: 32px 16px 72px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      width: 420px;
+      height: 420px;
+      border-radius: 50%;
+      filter: blur(90px);
+      pointer-events: none;
+      opacity: 0.45;
+      z-index: 0;
+    }
+
+    body::before {
+      top: -120px;
+      left: -120px;
+      background: rgba(57, 122, 255, 0.32);
+    }
+
+    body::after {
+      right: -120px;
+      bottom: -120px;
+      background: rgba(53, 196, 255, 0.18);
+    }
+
+    .wrap {
+      max-width: 1180px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, rgba(9, 23, 48, 0.94), rgba(12, 33, 74, 0.82));
+      border: 1px solid rgba(121, 180, 255, 0.2);
+      border-radius: 28px;
+      padding: 30px 30px 28px;
+      box-shadow: var(--shadow);
+      margin-bottom: 34px;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(120deg, rgba(255, 255, 255, 0.05), transparent 30%),
+        repeating-linear-gradient(90deg, rgba(125, 181, 255, 0.06), rgba(125, 181, 255, 0.06) 1px, transparent 1px, transparent 60px);
+      mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0.45));
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(120, 177, 255, 0.25);
+      background: rgba(110, 182, 255, 0.08);
+      color: var(--accent2);
+      font-size: 12px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .hero-grid {
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(280px, 0.8fr);
+      gap: 24px;
+      margin-top: 18px;
+      align-items: end;
+    }
+
+    h1 {
+      font-size: clamp(32px, 4vw, 44px);
+      font-weight: 700;
+      margin: 0 0 12px;
+      letter-spacing: 0.01em;
+      line-height: 1.08;
+      max-width: 9em;
+    }
+
+    .sub {
+      color: var(--muted);
+      margin: 0;
+      font-size: 15px;
+      line-height: 1.8;
+      max-width: 52em;
+    }
+
+    .hero-meta {
+      display: grid;
+      gap: 12px;
+    }
+
+    .metric {
+      padding: 16px 18px;
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(17, 39, 79, 0.82), rgba(8, 19, 42, 0.94));
+      border: 1px solid rgba(121, 180, 255, 0.18);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+    }
+
+    .metric-label {
+      color: var(--accent2);
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .metric-value {
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 0 0 16px;
+    }
+
+    .section-title .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: linear-gradient(180deg, var(--accent2), var(--accent-strong));
+      box-shadow: 0 0 18px rgba(110, 182, 255, 0.7);
+    }
+
+    .section-title h2 {
+      font-size: 19px;
+      margin: 0;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    .card {
+      background: linear-gradient(180deg, var(--panel), var(--panel-strong));
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 22px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    .mermaid-shell {
+      border-radius: 20px;
+      padding: 18px;
+      background:
+        linear-gradient(180deg, rgba(7, 18, 38, 0.98), rgba(9, 21, 44, 0.92)),
+        linear-gradient(90deg, rgba(124, 181, 255, 0.08), transparent);
+      border: 1px solid rgba(121, 180, 255, 0.16);
+      overflow: auto;
+    }
+
+    .note {
+      margin-top: 16px;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.7;
+      padding-top: 14px;
+      border-top: 1px solid rgba(121, 180, 255, 0.12);
+    }
+
+    .note b {
+      color: var(--text);
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      margin-right: 6px;
+      margin-bottom: 6px;
+    }
+
+    .tag.now {
+      background: rgba(110, 182, 255, 0.14);
+      color: var(--accent);
+      border: 1px solid rgba(110, 182, 255, 0.32);
+    }
+
+    .tag.future {
+      background: rgba(143, 216, 255, 0.12);
+      color: #c8edff;
+      border: 1px solid rgba(143, 216, 255, 0.24);
+    }
+
+    .mermaid {
+      background: transparent;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 20px;
+    }
+
+    .mini-card {
+      padding: 18px;
+      border-radius: 18px;
+      border: 1px solid rgba(121, 180, 255, 0.14);
+      background: linear-gradient(180deg, rgba(9, 21, 44, 0.78), rgba(7, 17, 36, 0.94));
+    }
+
+    .mini-card h3 {
+      margin: 0 0 10px;
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    .mini-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.75;
+    }
+
+    .inline-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    @media (max-width: 860px) {
+      .hero {
+        padding: 24px 20px;
+      }
+
+      .hero-grid {
+        grid-template-columns: 1fr;
+      }
+
+      h1 {
+        max-width: none;
+      }
+
+      .card {
+        padding: 16px;
+      }
+
+      .mermaid-shell {
+        padding: 12px;
+      }
+
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <div class="eyebrow">Cobalt Blueprint</div>
+      <div class="hero-grid">
+        <div>
+          <h1>AI 制造采购平台 · Level 3 架构与流程图</h1>
+          <div class="sub">产品定位：从图纸上传、制造分析、RFQ 协同、报价对比，到 PO 下发、交付追踪与学习闭环，形成完整的制造采购工作流，而不只是一次性的分析报告工具。</div>
+        </div>
+        <div class="hero-meta">
+          <div class="metric">
+            <div class="metric-label">Level 3 主线</div>
+            <div class="metric-value">Decision Pack 不再是终点，而是 RFQ、供应商选择、PO、交付与复盘的起点。</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">平台护城河</div>
+            <div class="metric-value">持续沉淀历史报价、供应商表现、交期质量与真实成本数据，让下一次 RFQ 更快、更准、更难迁移。</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="section-title">
+      <div class="dot"></div>
+      <h2>一、Level 3 业务流程图（从图纸到复购闭环）</h2>
+    </div>
+    <div class="card">
+      <div class="mermaid-shell">
+        <div class="mermaid">
+          flowchart TD
+          A["采购工程师/企业用户登录"] --> B["上传图纸文件 (PDF / STEP / 2D / 3D)"]
+          B --> C["选择规格参数<br />材质 / 工艺 / 精度 / 数量 / 表面处理"]
+          C --> D["AI Readback + 结构化提取"]
+          D --> E{"格式/完整性校验"}
+          E -- "信息缺失" --> C1["补充缺失项 / 澄清需求"]
+          C1 --> C
+          E -- "校验通过" --> F["Manufacturing Analysis<br />材料匹配 + 工艺成本建模 + 风险识别"]
+          F --> G["Decision Pack<br />制造可行性 / Cost Drivers / Missing Info / 推荐工艺"]
+          G --> H["生成 RFQ Package"]
+          H --> I["选择供应商池<br />内部供应商 + Marketplace"]
+          I --> J["自动发送 RFQ"]
+          J --> K["接收供应商报价"]
+          K --> L["Normalize Supplier Quotes<br />价格 / 交期 / 能力 / 质检要求"]
+          L --> M["AI Quote Comparison<br />比价 + 风险评分 + 置信度"]
+          M --> N["Procurement Recommendation"]
+          N --> O["工程师复核 / 管理审批"]
+          O --> P{"是否发起采购"}
+          P -- "否" --> C1
+          P -- "是" --> Q["创建 Purchase Order"]
+          Q --> R["Supplier Manufacturing"]
+          R --> S["Inspection Report / FAI / 出货质检"]
+          S --> T["Delivery / 签收 / 订单追踪"]
+          T --> U["Supplier Rating + 项目复盘"]
+          U --> V["Learning Cost Engine<br />真实成本 / 工时 / 不良率 / 交期表现"]
+          V --> W["更新知识库与供应商评分"]
+          W --> X["下一次 RFQ 更快、更准"]
+
+          classDef now fill:#5fa7ff,stroke:#9fd2ff,color:#f5fbff;
+          classDef future fill:#95ddff,stroke:#d3f1ff,color:#07223d,stroke-dasharray: 4 3;
+          class G,H,I,J,K,L,M,N,Q,T,U,V,W now;
+        </div>
+      </div>
+      <div class="note">
+        <span class="tag now">● Level 3</span>平台级流程：把报价分析嵌入真实采购执行链路
+        <span class="tag future">● 关键跃迁</span>Decision Pack 之后继续进入 RFQ、比价、PO、交付与学习闭环<br>
+        核心差异化已经从"给一份报告"升级为"帮用户完成一次采购决策并沉淀下一次更强的数据资产"。
+      </div>
+    </div>
+
+    <div class="section-title">
+      <div class="dot"></div>
+      <h2>二、平台四层架构图</h2>
+    </div>
+    <div class="card">
+      <div class="mermaid-shell">
+        <div class="mermaid">
+          flowchart TB
+          subgraph U["User Layer"]
+          U1["Customer Portal"]
+          U2["Supplier Portal"]
+          U3["Engineer Workspace"]
+          U4["Manager Dashboard"]
+          end
+
+          subgraph B["Business Workflow"]
+          B1["Upload + Spec Selection"]
+          B2["AI Readback"]
+          B3["Decision Pack"]
+          B4["RFQ Engine"]
+          B5["Quote Compare"]
+          B6["PO + Order Tracking"]
+          end
+
+          subgraph A["AI Engine"]
+          A1["Vision / OCR / LLM"]
+          A2["Evidence Engine"]
+          A3["Cost Engine"]
+          A4["Process Planner"]
+          A5["Supplier Ranking"]
+          A6["Risk + Confidence Scoring"]
+          end
+
+          subgraph D["Data Platform"]
+          D1[("Drawing Library")]
+          D2[("Supplier Database")]
+          D3[("Quote History")]
+          D4[("Cost Knowledge Base")]
+          D5[("Inspection Records")]
+          D6[("Learning Engine")]
+          end
+
+          U1 --> B1
+          U2 --> B4
+          U3 --> B3
+          U4 --> B6
+          B1 --> B2 --> B3 --> B4 --> B5 --> B6
+          B2 -.调用.-> A1
+          B2 -.调用.-> A2
+          B3 -.调用.-> A3
+          B3 -.调用.-> A4
+          B5 -.调用.-> A5
+          B5 -.调用.-> A6
+          A1 --> D1
+          A3 --> D3
+          A3 --> D4
+          A5 --> D2
+          B6 --> D5
+          D3 --> D6
+          D5 --> D6
+          D6 --> A3
+          D6 --> A5
+
+          classDef now fill:#5fa7ff,stroke:#9fd2ff,color:#f5fbff;
+          class B4,B5,B6,A3,A5,A6,D2,D3,D5,D6 now;
+        </div>
+      </div>
+      <div class="note">
+        这四层对应共享讨论里的重新定位：不是单一的 AI Reading 工具，而是 <b>用户层 + 业务流程层 + AI 能力层 + 数据平台层</b> 协同运作的制造采购平台。
+      </div>
+    </div>
+
+    <div class="section-title">
+      <div class="dot"></div>
+      <h2>三、三条关键闭环</h2>
+    </div>
+    <div class="grid-2">
+      <div class="mini-card">
+        <h3>Data Loop</h3>
+        <p>供应商报价、实际 PO 价格、真实制造成本、加工时间与返工记录持续回流，让成本引擎从“估算”升级为“基于真实成交数据的预测”。</p>
+        <div class="inline-tags">
+          <span class="tag now">Quote History</span>
+          <span class="tag now">Actual PO Price</span>
+          <span class="tag now">Better Cost Prediction</span>
+        </div>
+      </div>
+      <div class="mini-card">
+        <h3>Supplier Loop</h3>
+        <p>把报价、交付、质量、响应速度与返修情况纳入供应商评分体系，平台不只知道谁便宜，还知道谁在不同工艺场景下最可靠。</p>
+        <div class="inline-tags">
+          <span class="tag now">Lead Time</span>
+          <span class="tag now">Quality Score</span>
+          <span class="tag now">Preferred Supplier</span>
+        </div>
+      </div>
+      <div class="mini-card">
+        <h3>Customer Loop</h3>
+        <p>客户每次上传图纸、发 RFQ、下 PO、追踪订单、评价供应商，都会复用前一次形成的参数、供应商池和历史基线，迁移成本自然提高。</p>
+        <div class="inline-tags">
+          <span class="tag now">Historical Dashboard</span>
+          <span class="tag now">Repeat RFQ</span>
+          <span class="tag now">Workflow Stickiness</span>
+        </div>
+      </div>
+      <div class="mini-card">
+        <h3>Operating Role Split</h3>
+        <p>日常高频使用者应当是采购工程师；管理层则看月度支出、供应商表现和节约成效。这一角色拆分决定后续前端页面与权限设计。</p>
+        <div class="inline-tags">
+          <span class="tag future">Engineer Workspace</span>
+          <span class="tag future">Manager Dashboard</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      themeVariables: {
+        background: '#08142a',
+        primaryColor: '#0f2348',
+        primaryTextColor: '#edf6ff',
+        primaryBorderColor: '#5c9ef5',
+        lineColor: '#6db7ff',
+        secondaryColor: '#112a57',
+        tertiaryColor: '#0d1f42',
+        fontSize: '14px'
+      },
+      flowchart: { curve: 'basis' }
+    });
+  </script>
+</body>
+
+</html>
