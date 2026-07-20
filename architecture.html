@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloudflare-only Infrastructure Architecture</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.1/mermaid.min.js"></script>
+    <style>
+        :root {
+            --bg: #050b16;
+            --bg-soft: #0b1630;
+            --panel: rgba(11, 25, 54, 0.82);
+            --panel-strong: rgba(9, 20, 43, 0.96);
+            --border: rgba(114, 169, 255, 0.24);
+            --accent: #6eb6ff;
+            --accent-strong: #2b7fff;
+            --accent2: #8fd8ff;
+            --text: #eef5ff;
+            --muted: #9db2d3;
+            --shadow: 0 24px 60px rgba(0, 8, 24, 0.45);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at top left, rgba(70, 129, 255, 0.24), transparent 30%),
+                radial-gradient(circle at 85% 20%, rgba(69, 203, 255, 0.18), transparent 24%),
+                linear-gradient(180deg, #040914 0%, #07101d 34%, #091428 100%);
+            color: var(--text);
+            font-family: "PingFang SC", "SF Pro Display", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, sans-serif;
+            padding: 32px 16px 72px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before,
+        body::after {
+            content: "";
+            position: fixed;
+            width: 420px;
+            height: 420px;
+            border-radius: 50%;
+            filter: blur(90px);
+            pointer-events: none;
+            opacity: 0.45;
+            z-index: 0;
+        }
+
+        body::before {
+            top: -120px;
+            left: -120px;
+            background: rgba(57, 122, 255, 0.32);
+        }
+
+        body::after {
+            right: -120px;
+            bottom: -120px;
+            background: rgba(53, 196, 255, 0.18);
+        }
+
+        .wrap {
+            max-width: 1180px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, rgba(9, 23, 48, 0.94), rgba(12, 33, 74, 0.82));
+            border: 1px solid rgba(121, 180, 255, 0.2);
+            border-radius: 28px;
+            padding: 30px 30px 28px;
+            box-shadow: var(--shadow);
+            margin-bottom: 34px;
+        }
+
+        .hero::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(120deg, rgba(255, 255, 255, 0.05), transparent 30%),
+                repeating-linear-gradient(90deg, rgba(125, 181, 255, 0.06), rgba(125, 181, 255, 0.06) 1px, transparent 1px, transparent 60px);
+            mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0.45));
+            pointer-events: none;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(120, 177, 255, 0.25);
+            background: rgba(110, 182, 255, 0.08);
+            color: var(--accent2);
+            font-size: 12px;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+        }
+
+        .hero-grid {
+            position: relative;
+            display: grid;
+            grid-template-columns: minmax(0, 1.4fr) minmax(280px, 0.8fr);
+            gap: 24px;
+            margin-top: 18px;
+            align-items: end;
+        }
+
+        h1 {
+            font-size: clamp(32px, 4vw, 44px);
+            font-weight: 700;
+            margin: 0 0 12px;
+            letter-spacing: 0.01em;
+            line-height: 1.08;
+            max-width: 10em;
+        }
+
+        .sub {
+            color: var(--muted);
+            margin: 0;
+            font-size: 15px;
+            line-height: 1.8;
+            max-width: 54em;
+        }
+
+        .hero-meta {
+            display: grid;
+            gap: 12px;
+        }
+
+        .metric {
+            padding: 16px 18px;
+            border-radius: 18px;
+            background: linear-gradient(180deg, rgba(17, 39, 79, 0.82), rgba(8, 19, 42, 0.94));
+            border: 1px solid rgba(121, 180, 255, 0.18);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+        }
+
+        .metric-label {
+            color: var(--accent2);
+            font-size: 12px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .metric-value {
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 0 0 16px;
+        }
+
+        .section-title .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: linear-gradient(180deg, var(--accent2), var(--accent-strong));
+            box-shadow: 0 0 18px rgba(110, 182, 255, 0.7);
+        }
+
+        .section-title h2 {
+            font-size: 19px;
+            margin: 0;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+
+        .card {
+            background: linear-gradient(180deg, var(--panel), var(--panel-strong));
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 22px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(18px);
+            margin-bottom: 28px;
+        }
+
+        .mermaid-shell {
+            border-radius: 20px;
+            padding: 18px;
+            background:
+                linear-gradient(180deg, rgba(7, 18, 38, 0.98), rgba(9, 21, 44, 0.92)),
+                linear-gradient(90deg, rgba(124, 181, 255, 0.08), transparent);
+            border: 1px solid rgba(121, 180, 255, 0.16);
+            overflow: auto;
+        }
+
+        .note {
+            margin-top: 16px;
+            font-size: 13px;
+            color: var(--muted);
+            line-height: 1.7;
+            padding-top: 14px;
+            border-top: 1px solid rgba(121, 180, 255, 0.12);
+        }
+
+        .note b {
+            color: var(--text);
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            margin-right: 6px;
+            margin-bottom: 6px;
+        }
+
+        .tag.now {
+            background: rgba(110, 182, 255, 0.14);
+            color: var(--accent);
+            border: 1px solid rgba(110, 182, 255, 0.32);
+        }
+
+        .tag.future {
+            background: rgba(143, 216, 255, 0.12);
+            color: #c8edff;
+            border: 1px solid rgba(143, 216, 255, 0.24);
+        }
+
+        .mermaid {
+            background: transparent;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 20px;
+        }
+
+        .mini-card {
+            padding: 18px;
+            border-radius: 18px;
+            border: 1px solid rgba(121, 180, 255, 0.14);
+            background: linear-gradient(180deg, rgba(9, 21, 44, 0.78), rgba(7, 17, 36, 0.94));
+        }
+
+        .mini-card h3 {
+            margin: 0 0 10px;
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+
+        .mini-card p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.75;
+        }
+
+        .inline-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 14px;
+        }
+
+        @media (max-width: 860px) {
+            .hero {
+                padding: 24px 20px;
+            }
+
+            .hero-grid {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                max-width: none;
+            }
+
+            .card {
+                padding: 16px;
+            }
+
+            .mermaid-shell {
+                padding: 12px;
+            }
+
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <section class="hero">
+            <div class="eyebrow">Cloudflare Infrastructure Blueprint</div>
+            <div class="hero-grid">
+                <div>
+                    <h1>Infrastructure Only</h1>
+                    <div class="sub">This page shows the Cloudflare stack for a first-stage prototype: UI, backend,
+                        storage,
+                        async jobs, auth, and observability. Business workflow is intentionally removed.</div>
+                </div>
+                <div class="hero-meta">
+                    <div class="metric">
+                        <div class="metric-label">Primary Stack</div>
+                        <div class="metric-value">Pages, Workers, R2, D1, KV, Queues, Turnstile / Access, Logs.</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Design Rule</div>
+                        <div class="metric-value">Keep the architecture Cloudflare-only until the prototype proves a
+                            clear need
+                            for more infrastructure.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="section-title">
+            <div class="dot"></div>
+            <h2>一、Cloudflare Infrastructure Diagram</h2>
+        </div>
+        <div class="card">
+            <div class="mermaid-shell">
+                <div class="mermaid">
+                    flowchart TD
+                    U["User / Browser"] --> P["Cloudflare Pages<br />Frontend UI"]
+                    P --> W["Cloudflare Workers / Functions<br />API + Orchestration"]
+
+                    W --> T["Turnstile / Access<br />Auth + Protection"]
+                    W --> R["R2 Object Storage<br />Files / Drawings / Attachments"]
+                    W --> D["D1 Database<br />Users / Jobs / Records"]
+                    W --> K["KV Cache<br />Session / Draft / Feature Flags"]
+                    W --> Q["Queues<br />Async Processing"]
+                    W --> C["Cron Triggers<br />Scheduled Tasks"]
+                    W --> L["Logs / Analytics<br />Monitoring / Debugging"]
+
+                    Q --> W
+                    C --> W
+
+                    W -. optional .-> M["External AI API<br />LLM / Extraction / Classification"]
+                    M -. response .-> W
+
+                    classDef edge fill:#5fa7ff,stroke:#9fd2ff,color:#f5fbff;
+                    classDef data fill:#95ddff,stroke:#d3f1ff,color:#07223d;
+                    classDef ext fill:#f2a154,stroke:#c9812f,color:#231a10;
+                    class P,W,T,Q,C,L edge;
+                    class R,D,K,U data;
+                    class M ext;
+                </div>
+            </div>
+            <div class="note">
+                <span class="tag now">● Cloudflare-only</span>UI, backend, storage, auth, async jobs, and observability
+                <span class="tag future">● Optional external AI</span>only if the prototype needs model inference<br>
+                The recommended prototype pattern is Cloudflare-first and Cloudflare-only, with external services kept
+                optional rather than baked into the core architecture.
+            </div>
+        </div>
+
+        <div class="section-title">
+            <div class="dot"></div>
+            <h2>二、Cloudflare Stack Layers</h2>
+        </div>
+        <div class="card">
+            <div class="mermaid-shell">
+                <div class="mermaid">
+                    flowchart TB
+                    subgraph U["Presentation Layer"]
+                    U1["Cloudflare Pages"]
+                    U2["Static Assets / SPA"]
+                    end
+
+                    subgraph B["Compute Layer"]
+                    B1["Cloudflare Workers"]
+                    B2["API Routes / Orchestration"]
+                    B3["Background Jobs"]
+                    end
+
+                    subgraph A["Protection + Delivery Layer"]
+                    A1["Turnstile"]
+                    A2["Cloudflare Access"]
+                    A3["CDN / Edge Network"]
+                    end
+
+                    subgraph D["Data Layer"]
+                    D1[("R2")]
+                    D2[("D1")]
+                    D3[("KV")]
+                    D4[("Queues")]
+                    end
+
+                    U1 --> A3 --> B1
+                    U2 --> B1
+                    B1 --> B2
+                    B2 --> D1
+                    B2 --> D2
+                    B2 --> D3
+                    B2 --> D4
+                    B2 --> A1
+                    B2 --> A2
+                    B2 --> A3
+                    B3 --> D4
+                    B3 --> D2
+                    D4 --> B3
+
+                    classDef now fill:#5fa7ff,stroke:#9fd2ff,color:#f5fbff;
+                    class B1,B2,B3,A1,A2,A3,D1,D2,D3,D4 now;
+                </div>
+            </div>
+            <div class="note">
+                This layer view is infrastructure-only: presentation, compute, protection, and data are separated so the
+                prototype stays simple and cheap to operate.
+            </div>
+        </div>
+
+        <div class="section-title">
+            <div class="dot"></div>
+            <h2>三、Recommended Cloudflare Components</h2>
+        </div>
+        <div class="grid-2">
+            <div class="mini-card">
+                <h3>Pages</h3>
+                <p>Use Pages for the UI. It is the simplest way to host a prototype frontend with fast global delivery.
+                </p>
+                <div class="inline-tags">
+                    <span class="tag now">UI</span>
+                    <span class="tag now">Static Hosting</span>
+                </div>
+            </div>
+            <div class="mini-card">
+                <h3>Workers / Functions</h3>
+                <p>Use Workers for API routes, file processing, auth checks, and orchestration between storage and async
+                    jobs.</p>
+                <div class="inline-tags">
+                    <span class="tag now">API</span>
+                    <span class="tag now">Orchestration</span>
+                </div>
+            </div>
+            <div class="mini-card">
+                <h3>R2 + D1 + KV</h3>
+                <p>Use R2 for files, D1 for relational data, and KV for fast session or draft state. This is a clean
+                    Cloudflare-native data split.</p>
+                <div class="inline-tags">
+                    <span class="tag now">Files</span>
+                    <span class="tag now">Records</span>
+                    <span class="tag now">Session State</span>
+                </div>
+            </div>
+            <div class="mini-card">
+                <h3>Queues + Cron</h3>
+                <p>Use Queues for async work and Cron for scheduled tasks such as cleanup, sync, or periodic status
+                    checks.</p>
+                <div class="inline-tags">
+                    <span class="tag future">Async</span>
+                    <span class="tag future">Scheduled Tasks</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-title">
+            <div class="dot"></div>
+            <h2>四、Optional Add-ons</h2>
+        </div>
+        <div class="card">
+            <div class="note" style="border-top: none; margin-top: 0; padding-top: 0; font-size: 14px;">
+                <b>Turnstile / Access:</b> add when you need anti-bot protection or private access control.<br>
+                <b>External AI API:</b> keep optional for extraction or summarization, not part of the core Cloudflare
+                stack.<br>
+                <b>Analytics / Logs:</b> use for debugging, usage insight, and prototype validation.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'dark',
+            themeVariables: {
+                background: '#08142a',
+                primaryColor: '#0f2348',
+                primaryTextColor: '#edf6ff',
+                primaryBorderColor: '#5c9ef5',
+                lineColor: '#6db7ff',
+                secondaryColor: '#112a57',
+                tertiaryColor: '#0d1f42',
+                fontSize: '14px'
+            },
+            flowchart: { curve: 'basis' }
+        });
+    </script>
+</body>
+
+</html>
