@@ -85,13 +85,13 @@
 </svelte:head>
 
 <main
-  class="min-h-screen flex flex-col"
+  class="min-h-screen w-full flex flex-col overflow-x-hidden"
   style="background-image: url('/bg.webp'); background-size: cover; background-position: center top; background-repeat: no-repeat;"
 >
   <!-- Hero Tile (entire hero acts as the drop zone) -->
   <section
     aria-label="File upload drop zone"
-    class="relative flex-1 w-full flex flex-col px-spacing-lg py-spacing-section"
+    class="relative flex-1 w-full flex flex-col px-spacing-lg py-spacing-section overflow-visible"
     ondrop={handleDrop}
     ondragover={handleDragOver}
     ondragleave={handleDragLeave}
@@ -110,7 +110,7 @@
         >
           <Heading
             level={1}
-            class="w-full self-end whitespace-nowrap text-right font-display text-body-on-dark tracking-[-0.02em]"
+            class="w-full whitespace-nowrap text-right font-display text-body-on-dark tracking-[-0.02em] !text-[2.5rem]"
           >
             Upload Your CNC Design File
           </Heading>
