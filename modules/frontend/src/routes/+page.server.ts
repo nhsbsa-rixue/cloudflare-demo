@@ -1,4 +1,5 @@
 import { fail } from '@sveltejs/kit';
+import { dev } from '$app/environment';
 import type { Actions, PageServerLoad } from './$types';
 
 interface WorkerUploadResponse {
@@ -10,6 +11,8 @@ interface WorkerUploadResponse {
     uploadedAt: string;
   };
 }
+
+const LOCAL_WORKER_UPLOAD_URL = process.env.LOCAL_WORKER_UPLOAD_URL ?? 'http://127.0.0.1:8787/api/upload';
 
 // This runs on the server (Cloudflare Pages edge) — never exposed to the browser.
 export const load: PageServerLoad = async () => {
@@ -49,23 +52,30 @@ export const actions: Actions = {
 
     const workerBinding = platform?.env.WORKER;
 
-    if (!workerBinding) {
-      return fail(503, {
-        upload: null,
-        error: 'Worker unavailable via service binding'
-      });
-    }
-
     try {
       const backendFormData = new FormData();
       backendFormData.append('file', uploadedFile, uploadedFile.name);
 
-      const response = await workerBinding.fetch(
-        new Request('https://worker.internal/api/upload', {
-          method: 'POST',
-          body: backendFormData
-        })
-      );
+      const backendRequest = new Request('https://worker.internal/api/upload', {
+        method: 'POST',
+        body: backendFormData
+      });
+
+      const response = workerBinding
+        ? await workerBinding.fetch(backendRequest)
+        : dev
+          ? await fetch(new Request(LOCAL_WORKER_UPLOAD_URL, {
+            method: 'POST',
+            body: backendFormData
+          }))
+          : null;
+
+      if (!response) {
+        return fail(503, {
+          upload: null,
+          error: 'Worker unavailable via service binding'
+        });
+      }
 
       if (!response.ok) {
         const errorPayload = (await response.json().catch(() => null)) as { error?: string } | null;

@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node ./scripts/dev.mjs",
+    "dev": "vite dev",
+    "dev:cloudflare": "node ./scripts/dev.mjs",
     "build": "vite build",
     "deploy": "wrangler pages deploy .svelte-kit/cloudflare --project-name cloudflare-demo-web",
     "preview": "wrangler pages dev .svelte-kit/cloudflare",
