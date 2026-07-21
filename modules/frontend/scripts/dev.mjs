@@ -35,7 +35,6 @@ function start(command, args) {
 async function main() {
   await run('pnpm', ['build']);
 
-  const buildWatch = start('pnpm', ['build', '--watch']);
   const pagesDev = start('wrangler', [
     'pages',
     'dev',
@@ -44,7 +43,7 @@ async function main() {
     'WORKER=cloudflare-demo-worker'
   ]);
 
-  const children = [buildWatch, pagesDev];
+  const children = [pagesDev];
 
   const stopChildren = () => {
     for (const child of children) {
@@ -57,32 +56,18 @@ async function main() {
   process.once('SIGINT', stopChildren);
   process.once('SIGTERM', stopChildren);
 
-  await Promise.race([
-    new Promise((resolve, reject) => {
-      buildWatch.on('exit', (code, signal) => {
-        if (code === 0) {
-          resolve();
-          return;
-        }
+  await new Promise((resolve, reject) => {
+    pagesDev.on('exit', (code, signal) => {
+      if (code === 0 || signal === 'SIGINT' || signal === 'SIGTERM') {
+        resolve();
+        return;
+      }
 
-        reject(new Error(`pnpm build --watch exited with ${signal ?? code}`));
-      });
+      reject(new Error(`wrangler pages dev exited with ${signal ?? code}`));
+    });
 
-      buildWatch.on('error', reject);
-    }),
-    new Promise((resolve, reject) => {
-      pagesDev.on('exit', (code, signal) => {
-        if (code === 0) {
-          resolve();
-          return;
-        }
-
-        reject(new Error(`wrangler pages dev exited with ${signal ?? code}`));
-      });
-
-      pagesDev.on('error', reject);
-    })
-  ]).finally(stopChildren);
+    pagesDev.on('error', reject);
+  }).finally(stopChildren);
 }
 
 main().catch((error) => {

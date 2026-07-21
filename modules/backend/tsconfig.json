@@ -7,6 +7,7 @@
     "lib": ["ESNext"],
     "types": ["@cloudflare/workers-types"],
     "strict": true,
+    "skipLibCheck": true,
     "noUncheckedIndexedAccess": true,
     "verbatimModuleSyntax": true,
     "noEmit": true

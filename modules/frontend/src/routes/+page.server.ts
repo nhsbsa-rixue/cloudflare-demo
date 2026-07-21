@@ -1,15 +1,20 @@
 import { fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
-interface WorkerHelloResponse {
-  message: string;
-  timestamp: string;
+interface WorkerUploadResponse {
+  upload: {
+    key: string;
+    filename: string;
+    contentType: string;
+    size: number;
+    uploadedAt: string;
+  };
 }
 
 // This runs on the server (Cloudflare Pages edge) — never exposed to the browser.
 export const load: PageServerLoad = async () => {
   return {
-    greeting: null,
+    upload: null,
     error: null
   };
 };
@@ -17,14 +22,28 @@ export const load: PageServerLoad = async () => {
 export const actions: Actions = {
   default: async ({ request, platform }) => {
     const formData = await request.formData();
-    const rawUsername = formData.get('username');
-    const username = typeof rawUsername === 'string' ? rawUsername.trim() : '';
+    const uploadedFile = formData.get('file');
 
-    if (!username) {
+    if (!(uploadedFile instanceof File)) {
       return fail(400, {
-        greeting: null,
-        error: 'username is required',
-        username
+        upload: null,
+        error: 'file is required'
+      });
+    }
+
+    const allowedTypes = new Set(['image/png', 'image/jpeg', 'application/pdf']);
+    if (!allowedTypes.has(uploadedFile.type.toLowerCase())) {
+      return fail(400, {
+        upload: null,
+        error: 'unsupported file type; only png, jpg, jpeg, pdf are allowed'
+      });
+    }
+
+    const maxSizeBytes = 10 * 1024 * 1024;
+    if (uploadedFile.size > maxSizeBytes) {
+      return fail(413, {
+        upload: null,
+        error: 'file too large; max size is 10 MB'
       });
     }
 
@@ -32,42 +51,40 @@ export const actions: Actions = {
 
     if (!workerBinding) {
       return fail(503, {
-        greeting: null,
-        error: 'Worker unavailable via service binding',
-        username
+        upload: null,
+        error: 'Worker unavailable via service binding'
       });
     }
 
     try {
+      const backendFormData = new FormData();
+      backendFormData.append('file', uploadedFile, uploadedFile.name);
+
       const response = await workerBinding.fetch(
-        new Request('https://worker.internal/api/hello', {
+        new Request('https://worker.internal/api/upload', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username })
+          body: backendFormData
         })
       );
 
       if (!response.ok) {
         const errorPayload = (await response.json().catch(() => null)) as { error?: string } | null;
         return fail(response.status, {
-          greeting: null,
-          error: errorPayload?.error ?? `Worker request failed with ${response.status}`,
-          username
+          upload: null,
+          error: errorPayload?.error ?? `Worker request failed with ${response.status}`
         });
       }
 
-      const greeting: WorkerHelloResponse = await response.json();
+      const payload: WorkerUploadResponse = await response.json();
 
       return {
-        greeting,
-        error: null,
-        username
+        upload: payload.upload,
+        error: null
       };
     } catch {
       return fail(503, {
-        greeting: null,
-        error: 'Worker unavailable via service binding',
-        username
+        upload: null,
+        error: 'Worker unavailable via service binding'
       });
     }
   }

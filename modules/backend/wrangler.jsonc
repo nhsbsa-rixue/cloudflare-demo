@@ -3,8 +3,11 @@
   "main": "src/index.ts",
   "compatibility_date": "2026-01-01",
   // nodejs_compat gives access to Node.js built-ins (crypto, buffer, streams, etc.)
-  "compatibility_flags": ["nodejs_compat"]
-  // Add bindings below as you use them:
-  // "kv_namespaces": [{ "binding": "MY_KV", "id": "..." }],
-  // "d1_databases": [{ "binding": "MY_DB", "database_id": "..." }]
+  "compatibility_flags": ["nodejs_compat"],
+  "r2_buckets": [
+    {
+      "binding": "UPLOADS_BUCKET",
+      "bucket_name": "files"
+    }
+  ]
 }
