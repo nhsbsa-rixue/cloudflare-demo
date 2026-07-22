@@ -12,8 +12,6 @@ interface WorkerUploadResponse {
   };
 }
 
-const LOCAL_WORKER_UPLOAD_URL = process.env.LOCAL_WORKER_UPLOAD_URL ?? 'http://127.0.0.1:8787/api/upload';
-
 // This runs on the server (Cloudflare Pages edge) — never exposed to the browser.
 export const load: PageServerLoad = async () => {
   return {
@@ -51,6 +49,7 @@ export const actions: Actions = {
     }
 
     const workerBinding = platform?.env.WORKER;
+    const LOCAL_WORKER_UPLOAD_URL = 'http://127.0.0.1:8787/api/upload';
 
     try {
       const backendFormData = new FormData();
@@ -75,7 +74,7 @@ export const actions: Actions = {
       if (!response) {
         return fail(503, {
           upload: null,
-          error: 'Worker unavailable via service binding'
+          error: 'Upload service currently unavailable'
         });
       }
 
@@ -96,7 +95,7 @@ export const actions: Actions = {
     } catch {
       return fail(503, {
         upload: null,
-        error: 'Worker unavailable via service binding'
+        error: 'Upload service currently unavailable'
       });
     }
   }
