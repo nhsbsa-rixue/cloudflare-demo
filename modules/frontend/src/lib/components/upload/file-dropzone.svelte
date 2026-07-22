@@ -1,6 +1,7 @@
 <script lang="ts">
   import * as FileDropZone from "$lib/components/ui/file-drop-zone";
   import { Text } from "$lib/components/ui/typography/index.js";
+  import UploadIcon from "@lucide/svelte/icons/upload";
 
   interface SelectionChangeDetail {
     droppedFile: File | null;
@@ -109,9 +110,14 @@
     <div
       role="region"
       aria-label="Single file upload drop zone"
-      class="w-full rounded-md border border-hairline bg-surface-pearl p-6 transition-colors hover:border-primary/55"
+      class="group flex min-h-96 w-full flex-col items-center justify-center gap-4 rounded-md border-2 border-dashed border-hairline bg-surface-pearl p-6 transition-all duration-300 hover:border-primary-focus hover:bg-primary-focus/8 hover:shadow-[0_0_0_4px_rgba(0,113,227,0.12)]"
       class:border-primary={!!selectedFileName}
     >
+      <div
+        class="flex size-16 place-items-center justify-center rounded-full border border-hairline bg-canvas text-ink-muted-48 transition-all duration-300 group-hover:scale-110 group-hover:border-primary-focus group-hover:bg-primary-focus/12 group-hover:text-primary-focus"
+      >
+        <UploadIcon class="size-8" />
+      </div>
       <div class="flex flex-col gap-2 text-center">
         <Text class="text-base font-semibold text-ink">
           Drag and drop one file here
