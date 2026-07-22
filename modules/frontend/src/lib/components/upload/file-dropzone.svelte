@@ -2,6 +2,8 @@
   import * as FileDropZone from "$lib/components/ui/file-drop-zone";
   import { Text } from "$lib/components/ui/typography/index.js";
   import UploadIcon from "@lucide/svelte/icons/upload";
+  import CircleCheckIcon from "@lucide/svelte/icons/circle-check";
+  import XIcon from "@lucide/svelte/icons/x";
 
   interface SelectionChangeDetail {
     droppedFile: File | null;
@@ -70,6 +72,42 @@
     emitSelectionChange(file);
   }
 
+  function clearFile() {
+    selectedFileName = "";
+    droppedFile = null;
+    localError = "";
+    emitSelectionChange(null);
+  }
+
+  function handleRemoveClick(event: MouseEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    clearFile();
+  }
+
+  function formatFileSize(bytes: number): string {
+    if (bytes < 1024) {
+      return `${bytes} B`;
+    }
+
+    const units = ["KB", "MB", "GB"];
+    let value = bytes;
+    let unitIndex = -1;
+
+    do {
+      value /= 1024;
+      unitIndex++;
+    } while (value >= 1024 && unitIndex < units.length - 1);
+
+    return `${value.toFixed(1)} ${units[unitIndex]}`;
+  }
+
+  const dropZoneStateClass = $derived(
+    selectedFileName
+      ? "border-emerald-400 bg-emerald-50"
+      : "border-hairline bg-surface-pearl hover:border-primary-focus hover:bg-primary-focus/8 hover:shadow-[0_0_0_4px_rgba(0,113,227,0.12)]",
+  );
+
   function mapRejectionMessage(reason: FileDropZone.FileRejectedReason): string {
     if (reason === "Maximum file size exceeded") {
       return "File size must be 10 MB or less.";
@@ -110,34 +148,58 @@
     <div
       role="region"
       aria-label="Single file upload drop zone"
-      class="group flex min-h-96 w-full flex-col items-center justify-center gap-4 rounded-md border-2 border-dashed border-hairline bg-surface-pearl p-6 transition-all duration-300 hover:border-primary-focus hover:bg-primary-focus/8 hover:shadow-[0_0_0_4px_rgba(0,113,227,0.12)]"
-      class:border-primary={!!selectedFileName}
+      class="group relative flex min-h-96 w-full flex-col items-center justify-center gap-4 rounded-md border-2 border-dashed p-6 transition-all duration-300 {dropZoneStateClass}"
     >
-      <div
-        class="flex size-16 place-items-center justify-center rounded-full border border-hairline bg-canvas text-ink-muted-48 transition-all duration-300 group-hover:scale-110 group-hover:border-primary-focus group-hover:bg-primary-focus/12 group-hover:text-primary-focus"
-      >
-        <UploadIcon class="size-8" />
-      </div>
-      <div class="flex flex-col gap-2 text-center">
-        <Text class="text-base font-semibold text-ink">
-          Drag and drop one file here
-        </Text>
-        <Text class="text-sm text-ink-muted-48">
-          or click to browse from your device
-        </Text>
-      </div>
+      {#if selectedFileName}
+        <button
+          type="button"
+          class="absolute right-4 top-4 flex size-8 items-center justify-center rounded-full border border-hairline bg-canvas text-ink-muted-48 transition-colors hover:border-red-400 hover:text-red-600"
+          aria-label="Remove selected file"
+          onclick={handleRemoveClick}
+        >
+          <XIcon class="size-4" />
+        </button>
+
+        <div
+          class="flex size-16 place-items-center justify-center rounded-full border border-emerald-200 bg-emerald-100 text-emerald-600"
+        >
+          <CircleCheckIcon class="size-8" />
+        </div>
+        <div class="flex flex-col gap-1 px-8 text-center">
+          <Text class="text-base font-semibold text-ink break-all">
+            {selectedFileName}
+          </Text>
+          <Text class="text-sm text-emerald-600">
+            Ready to upload{#if droppedFile}
+              &nbsp;· {formatFileSize(droppedFile.size)}
+            {/if}
+          </Text>
+        </div>
+      {:else}
+        <div
+          class="flex size-16 place-items-center justify-center rounded-full border border-hairline bg-canvas text-ink-muted-48 transition-all duration-300 group-hover:scale-110 group-hover:border-primary-focus group-hover:bg-primary-focus/12 group-hover:text-primary-focus"
+        >
+          <UploadIcon class="size-8" />
+        </div>
+        <div class="flex flex-col gap-2 text-center">
+          <Text class="text-base font-semibold text-ink">
+            Drag and drop one file here
+          </Text>
+          <Text class="text-sm text-ink-muted-48">
+            or click to browse from your device
+          </Text>
+        </div>
+      {/if}
     </div>
   </FileDropZone.Trigger>
 </FileDropZone.Root>
 
 {#if selectedFileName}
-  <div aria-live="polite">
-    <Text class="text-sm text-ink">File selected: {selectedFileName}</Text>
+  <div aria-live="polite" class="sr-only">
+    File selected: {selectedFileName}
   </div>
 {:else}
-  <div aria-live="polite">
-    <Text class="text-sm text-ink-muted-48">No file selected yet.</Text>
-  </div>
+  <div aria-live="polite" class="sr-only">No file selected yet.</div>
 {/if}
 
 <Text class="text-xs text-ink-muted-48">

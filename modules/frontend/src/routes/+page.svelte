@@ -53,7 +53,7 @@
   <!-- Hero Tile -->
   <section
     aria-label="File upload drop zone"
-    class="relative flex-1 w-full flex flex-col px-spacing-lg py-spacing-section overflow-visible"
+    class="relative flex-1 w-full flex flex-col px-spacing-lg py-spacing-section pt-(--spacing-xl) pb-(--spacing-section) overflow-visible"
   >
     <div
       class="absolute inset-0"
@@ -71,12 +71,12 @@
             level={1}
             class="w-full whitespace-nowrap text-right font-display text-body-on-dark tracking-[-0.02em] text-[2.5rem]!"
           >
-            Upload Your CNC Design File
+            CNC design upload
           </Heading>
 
           <Card
             variant="utility"
-            class="w-full max-w-104 self-center min-h-164 text-left transition-all duration-500 flex flex-col"
+            class="w-full max-w-104 self-end min-h-164 mb-(--spacing-xxl) text-left transition-all duration-500 flex flex-col"
           >
             <CardHeader>
               <div class="flex items-center justify-between gap-3">
