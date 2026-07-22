@@ -2,6 +2,7 @@
   import type { ActionData, PageData } from "./$types";
   import { enhance } from "$app/forms";
   import { Button } from "$lib/components/ui/button/index.js";
+  import { Badge } from "$lib/components/ui/badge/index.js";
   import FileDropzone from "$lib/components/upload/file-dropzone.svelte";
   import {
     Card,
@@ -16,6 +17,7 @@
 
   const apiResult = $derived(form?.upload ?? data.upload);
   const apiError = $derived(form?.error ?? data.error);
+  const hasSelectedFile = $derived(!!droppedFile);
 
   function enhanceUpload(formElement: HTMLFormElement) {
     return enhance(formElement, ({ formData }) => {
@@ -34,10 +36,8 @@
     });
   }
 
-  function handleSelectionChange(
-    event: CustomEvent<{ droppedFile: File | null }>,
-  ) {
-    droppedFile = event.detail.droppedFile;
+  function handleSelectionChange(detail: { droppedFile: File | null }) {
+    droppedFile = detail.droppedFile;
   }
 </script>
 
@@ -79,28 +79,55 @@
             class="w-full max-w-104 self-center min-h-164 text-left transition-all duration-500 flex flex-col"
           >
             <CardHeader>
-              <Text
-                class="text-sm font-semibold uppercase tracking-wider text-ink-muted-48"
-              >
-                File Upload
-              </Text>
+              <div class="flex items-center justify-between gap-3">
+                <Text
+                  class="text-sm font-semibold uppercase tracking-wider text-ink-muted-48"
+                >
+                  Single File Upload
+                </Text>
+                <Badge variant="pearl" selected={hasSelectedFile}>
+                  {#if hasSelectedFile}
+                    1 file selected
+                  {:else}
+                    No file selected
+                  {/if}
+                </Badge>
+              </div>
             </CardHeader>
 
             <CardContent class="flex flex-1 flex-col gap-6">
               <form
                 method="POST"
                 enctype="multipart/form-data"
-                use:enhanceUpload
                 class="flex flex-1 flex-col gap-6"
+                use:enhanceUpload
               >
-                <FileDropzone on:selectionchange={handleSelectionChange} />
+                <FileDropzone onSelectionChange={handleSelectionChange} />
 
-                <Button type="submit" size="md" variant="primary" class="w-full"
-                  >Upload File</Button
+                <Button
+                  type="submit"
+                  size="md"
+                  variant="primary"
+                  class="w-full"
+                  disabled={!hasSelectedFile}
                 >
+                  {#if hasSelectedFile}
+                    Upload Selected File
+                  {:else}
+                    Select a File to Upload
+                  {/if}
+                </Button>
               </form>
 
-              {#if apiError}
+              {#if hasSelectedFile && droppedFile}
+                <div aria-live="polite">
+                  <Text class="text-sm text-ink">
+                    Ready to upload: {droppedFile.name}
+                  </Text>
+                </div>
+              {/if}
+
+              {#if apiError && hasSelectedFile}
                 <Text class="text-sm text-red-600 font-mono">{apiError}</Text>
               {:else if apiResult}
                 <div class="space-y-2">
