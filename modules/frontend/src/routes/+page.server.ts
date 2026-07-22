@@ -64,10 +64,12 @@ export const actions: Actions = {
       const response = workerBinding
         ? await workerBinding.fetch(backendRequest)
         : dev
-          ? await fetch(new Request(LOCAL_WORKER_UPLOAD_URL, {
-            method: 'POST',
-            body: backendFormData
-          }))
+          ? await fetch(
+              new Request(LOCAL_WORKER_UPLOAD_URL, {
+                method: 'POST',
+                body: backendFormData
+              })
+            )
           : null;
 
       if (!response) {
