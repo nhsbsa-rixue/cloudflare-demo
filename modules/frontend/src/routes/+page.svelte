@@ -106,11 +106,11 @@
       <!-- Right column: heading appears above the upload card -->
       <div class="flex-1 flex items-center justify-center lg:justify-end">
         <div
-          class="w-full max-w-[44rem] shrink-0 lg:ml-auto lg:mr-10 xl:mr-16 flex flex-col gap-6"
+          class="w-full max-w-176 shrink-0 lg:ml-auto lg:mr-10 xl:mr-16 flex flex-col gap-6"
         >
           <Heading
             level={1}
-            class="w-full whitespace-nowrap text-right font-display text-body-on-dark tracking-[-0.02em] !text-[2.5rem]"
+            class="w-full whitespace-nowrap text-right font-display text-body-on-dark tracking-[-0.02em] text-[2.5rem]!"
           >
             Upload Your CNC Design File
           </Heading>
@@ -118,7 +118,7 @@
           <Card
             variant="utility"
             class={cn(
-              "w-full max-w-[26rem] self-center min-h-[41rem] text-left transition-all duration-500 flex flex-col",
+              "w-full max-w-104 self-center min-h-164 text-left transition-all duration-500 flex flex-col",
               isDragging &&
                 "ring-2 ring-primary shadow-[0_0_32px_8px_rgba(0,102,204,0.5)]",
               !isDragging &&
