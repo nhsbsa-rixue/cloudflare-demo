@@ -14,7 +14,8 @@
     "skipLibCheck": true,
     "sourceMap": true,
     "target": "ESNext",
-    "module": "ESNext"
+    "module": "ESNext",
+    "types": ["node"]
   },
   "include": [
     "src/**/*.ts",

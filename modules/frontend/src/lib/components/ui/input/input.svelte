@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { cn } from '$lib/utils';
+  import { cva } from "class-variance-authority";
+  import { cn } from "$lib/utils";
 
   interface Props {
     type?: string;
@@ -12,7 +13,15 @@
     class?: string;
     name?: string;
     id?: string;
-    autocomplete?: string | 'on' | 'off' | 'email' | 'password' | 'username' | 'current-password' | 'new-password';
+    autocomplete?:
+      | string
+      | "on"
+      | "off"
+      | "email"
+      | "password"
+      | "username"
+      | "current-password"
+      | "new-password";
     onchange?: (event: Event) => void;
     oninput?: (event: Event) => void;
     onblur?: (event: Event) => void;
@@ -20,9 +29,9 @@
   }
 
   let {
-    type = 'text',
+    type = "text",
     placeholder,
-    value = '',
+    value = "",
     disabled = false,
     readonly = false,
     label,
@@ -35,12 +44,14 @@
     oninput,
     onblur,
     onfocus,
-  }: Props = $props();
+    ...restProps
+  }: Props & Record<string, unknown> = $props();
 
-  const inputClass = $derived(cn(
-    'w-full rounded-pill border border-hairline bg-canvas px-5 py-3 text-body placeholder-ink-muted-48 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:border-transparent disabled:bg-divider-soft disabled:text-ink-muted-48 disabled:cursor-not-allowed',
-    className
-  ));
+  const inputVariants = cva(
+    "w-full rounded-pill border border-hairline bg-canvas px-5 py-3 text-body placeholder-ink-muted-48 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:border-transparent disabled:bg-divider-soft disabled:text-ink-muted-48 disabled:cursor-not-allowed",
+  );
+
+  const inputClass = $derived(cn(inputVariants(), className));
 </script>
 
 {#if label}
@@ -67,4 +78,5 @@
   {onblur}
   {onfocus}
   class={inputClass}
+  {...restProps}
 />
