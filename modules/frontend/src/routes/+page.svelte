@@ -1,7 +1,8 @@
 <script lang="ts">
   import type { ActionData, PageData } from "./$types";
-  import { cn } from "$lib/utils";
+  import { enhance } from "$app/forms";
   import { Button } from "$lib/components/ui/button/index.js";
+  import FileDropzone from "$lib/components/upload/file-dropzone.svelte";
   import {
     Card,
     CardContent,
@@ -11,71 +12,32 @@
 
   let { data, form }: { data: PageData; form: ActionData } = $props();
   const title = "CNC Demo Upload";
-  const allowedTypes = ["image/png", "image/jpeg", "application/pdf"];
-
-  let isDragging = $state(false);
-  let localError = $state("");
-  let selectedFileName = $state("");
-  let fileInput: HTMLInputElement | null = null;
+  let droppedFile = $state<File | null>(null);
 
   const apiResult = $derived(form?.upload ?? data.upload);
   const apiError = $derived(form?.error ?? data.error);
 
-  function setFile(file: File | null) {
-    if (!file || !fileInput) {
-      return;
-    }
+  function enhanceUpload(formElement: HTMLFormElement) {
+    return enhance(formElement, ({ formData }) => {
+      const current = formData.get("file");
+      const hasFile =
+        current instanceof File && (current.name.length > 0 || current.size > 0);
 
-    if (!allowedTypes.includes(file.type)) {
-      localError = "Only PNG, JPG, JPEG, and PDF files are allowed.";
-      selectedFileName = "";
-      fileInput.value = "";
-      return;
-    }
+      if (!hasFile && droppedFile) {
+        formData.set("file", droppedFile, droppedFile.name);
+      }
 
-    if (file.size > 10 * 1024 * 1024) {
-      localError = "File size must be 10 MB or less.";
-      selectedFileName = "";
-      fileInput.value = "";
-      return;
-    }
-
-    const transfer = new DataTransfer();
-    transfer.items.add(file);
-    fileInput.files = transfer.files;
-    selectedFileName = file.name;
-    localError = "";
+      return async ({ update }) => {
+        await update();
+        droppedFile = null;
+      };
+    });
   }
 
-  function handleDrop(event: DragEvent) {
-    event.preventDefault();
-    isDragging = false;
-    const file = event.dataTransfer?.files?.[0] ?? null;
-    setFile(file);
-  }
-
-  function handleDragOver(event: DragEvent) {
-    event.preventDefault();
-    isDragging = true;
-  }
-
-  function handleDragLeave(event: DragEvent) {
-    event.preventDefault();
-    const related = event.relatedTarget as Node | null;
-    if (
-      related &&
-      event.currentTarget instanceof Node &&
-      event.currentTarget.contains(related)
-    ) {
-      return;
-    }
-    isDragging = false;
-  }
-
-  function handleInputChange(event: Event) {
-    const target = event.currentTarget as HTMLInputElement;
-    const file = target.files?.[0] ?? null;
-    setFile(file);
+  function handleSelectionChange(
+    event: CustomEvent<{ droppedFile: File | null }>,
+  ) {
+    droppedFile = event.detail.droppedFile;
   }
 </script>
 
@@ -88,13 +50,10 @@
   class="min-h-screen w-full flex flex-col overflow-x-hidden"
   style="background-image: url('/bg.webp'); background-size: cover; background-position: center top; background-repeat: no-repeat;"
 >
-  <!-- Hero Tile (entire hero acts as the drop zone) -->
+  <!-- Hero Tile -->
   <section
     aria-label="File upload drop zone"
     class="relative flex-1 w-full flex flex-col px-spacing-lg py-spacing-section overflow-visible"
-    ondrop={handleDrop}
-    ondragover={handleDragOver}
-    ondragleave={handleDragLeave}
   >
     <div
       class="absolute inset-0"
@@ -117,14 +76,7 @@
 
           <Card
             variant="utility"
-            class={cn(
-              "w-full max-w-104 self-center min-h-164 text-left transition-all duration-500 flex flex-col",
-              isDragging &&
-                "ring-2 ring-primary shadow-[0_0_32px_8px_rgba(0,102,204,0.5)]",
-              !isDragging &&
-                selectedFileName &&
-                "ring-2 ring-primary/70 shadow-[0_0_24px_6px_rgba(0,102,204,0.4)] scale-[1.01]",
-            )}
+            class="w-full max-w-104 self-center min-h-164 text-left transition-all duration-500 flex flex-col"
           >
             <CardHeader>
               <Text
@@ -138,40 +90,10 @@
               <form
                 method="POST"
                 enctype="multipart/form-data"
+                use:enhanceUpload
                 class="flex flex-1 flex-col gap-6"
               >
-                <div
-                  class="flex-1 rounded-lg border-2 border-dashed bg-surface-pearl p-6 space-y-3 transition-colors"
-                  class:border-primary={isDragging || selectedFileName}
-                  class:border-hairline={!isDragging && !selectedFileName}
-                >
-                  <label for="file" class="block text-sm font-medium text-ink">
-                    Select a file to upload or drag and drop here
-                  </label>
-                  <input
-                    id="file"
-                    name="file"
-                    type="file"
-                    accept=".png,.jpg,.jpeg,.pdf,image/png,image/jpeg,application/pdf"
-                    required
-                    bind:this={fileInput}
-                    onchange={handleInputChange}
-                    class="block w-full text-sm text-ink file:mr-4 file:rounded-pill file:border-0 file:bg-primary file:px-4 file:py-2 file:text-white hover:file:bg-primary-focus"
-                  />
-                  {#if selectedFileName}
-                    <Text class="text-xs text-ink"
-                      >Selected: {selectedFileName}</Text
-                    >
-                  {/if}
-                  <Text class="text-xs text-ink-muted-48">
-                    Allowed formats: PNG, JPG, JPEG, PDF. Max size: 10 MB.
-                  </Text>
-                  {#if localError}
-                    <Text class="text-sm text-red-600 font-mono"
-                      >{localError}</Text
-                    >
-                  {/if}
-                </div>
+                <FileDropzone on:selectionchange={handleSelectionChange} />
 
                 <Button type="submit" size="md" variant="primary" class="w-full"
                   >Upload File</Button
