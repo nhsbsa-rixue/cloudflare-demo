@@ -63,21 +63,20 @@
 
     <div class="relative z-10 w-full flex-1 flex flex-col">
       <!-- Right column: heading appears above the upload card -->
-      <div class="flex-1 flex items-center justify-center lg:justify-end">
-        <div
-          class="w-full max-w-176 shrink-0 lg:ml-auto lg:mr-10 xl:mr-16 flex flex-col gap-6"
-        >
-          <Heading
-            level={1}
-            class="w-full whitespace-nowrap text-right font-display text-body-on-dark tracking-[-0.02em] text-[2.5rem]!"
-          >
-            CNC design upload
-          </Heading>
+      <div class="flex-1 flex items-center justify-center">
+        <div class="w-full max-w-[1440px] mx-auto lg:grid lg:grid-cols-3">
+          <div class="w-full max-w-104 mx-auto lg:col-start-3 lg:justify-self-center flex flex-col gap-6">
+            <Heading
+              level={1}
+              class="w-full text-center font-display text-body-on-dark tracking-[-0.02em] text-[2rem]! sm:text-[2.5rem]!"
+            >
+              CNC design upload
+            </Heading>
 
-          <Card
-            variant="utility"
-            class="w-full max-w-104 self-end min-h-164 mb-(--spacing-xxl) text-left transition-all duration-500 flex flex-col"
-          >
+            <Card
+              variant="utility"
+              class="w-full min-h-164 mb-(--spacing-xxl) text-left transition-all duration-500 flex flex-col"
+            >
             <CardHeader>
               <div class="flex items-center justify-between gap-3">
                 <Text
@@ -149,7 +148,8 @@
                 </div>
               {/if}
             </CardContent>
-          </Card>
+            </Card>
+          </div>
         </div>
       </div>
     </div>
