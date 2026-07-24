@@ -41,7 +41,8 @@ describe('upload API', () => {
     const [key, streamBody, options] = firstCall;
     expect(typeof key).toBe('string');
     expect(key).toContain('uploads/');
-    expect(key).toContain('test-image.png');
+    expect(key).toContain('.png');
+    expect(key).toContain('cnc-');
     expect(streamBody).toBeDefined();
     expect(options).toMatchObject({
       httpMetadata: { contentType: 'image/png' },
@@ -131,5 +132,52 @@ describe('upload API', () => {
     await expect(response.json()).resolves.toMatchObject({
       error: 'Method Not Allowed'
     });
+  });
+
+  it('returns 400 for unsupported upload type query', async () => {
+    const { env } = createEnv();
+
+    const formData = new FormData();
+    const file = new File([new Uint8Array([1, 2, 3])], 'test-image.png', { type: 'image/png' });
+    formData.append('file', file);
+
+    const request = new Request('https://worker.internal/api/upload?type=laser', {
+      method: 'POST',
+      body: formData
+    });
+
+    const response = await worker.fetch(request, env, {} as ExecutionContext);
+
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toMatchObject({
+      error: expect.stringContaining('unsupported upload type')
+    });
+  });
+
+  it('accepts supported upload type query', async () => {
+    const { env, put } = createEnv();
+
+    const formData = new FormData();
+    const file = new File([new Uint8Array([1, 2, 3])], 'test-image.png', { type: 'image/png' });
+    formData.append('file', file);
+
+    const request = new Request('https://worker.internal/api/upload?type=cnc', {
+      method: 'POST',
+      body: formData
+    });
+
+    const response = await worker.fetch(request, env, {} as ExecutionContext);
+
+    expect(response.status).toBe(200);
+    expect(put).toHaveBeenCalledTimes(1);
+    const firstCall = put.mock.calls.at(0);
+    expect(firstCall).toBeDefined();
+    if (!firstCall) {
+      throw new Error('expected first R2 put call to exist');
+    }
+
+    const [key] = firstCall;
+    expect(typeof key).toBe('string');
+    expect(key).toContain('/cnc-');
   });
 });

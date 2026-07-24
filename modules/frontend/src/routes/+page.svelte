@@ -97,6 +97,7 @@
             <CardContent class="flex flex-1 flex-col gap-6">
               <form
                 method="POST"
+                action="?type=cnc"
                 enctype="multipart/form-data"
                 class="flex flex-1 flex-col gap-6"
                 use:enhanceUpload

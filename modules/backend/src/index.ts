@@ -1,4 +1,5 @@
 import type { Env } from './types';
+import { caseIdGenerator } from '../../utils';
 
 const CORS_HEADERS: HeadersInit = {
   'Access-Control-Allow-Origin': '*',
@@ -10,6 +11,8 @@ const CORS_HEADERS: HeadersInit = {
 const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
 const ALLOWED_EXTENSIONS = new Set(['png', 'jpg', 'jpeg', 'pdf']);
 const ALLOWED_MIME_TYPES = new Set(['image/png', 'image/jpeg', 'application/pdf']);
+const ALLOWED_UPLOAD_TYPES = ['cnc'] as const;
+type UploadType = (typeof ALLOWED_UPLOAD_TYPES)[number];
 
 interface UploadSuccessResponse {
   upload: {
@@ -38,16 +41,23 @@ function sanitizeFilename(filename: string): string {
     .slice(0, 120);
 }
 
-function createObjectKey(filename: string, uploadedAtIso: string): string {
-  const date = new Date(uploadedAtIso);
-  const year = date.getUTCFullYear();
-  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-  const day = String(date.getUTCDate()).padStart(2, '0');
-  const timestamp = date.getTime();
-  const randomSuffix = crypto.randomUUID().slice(0, 8);
-  const cleanedName = sanitizeFilename(filename) || 'upload.bin';
+function createObjectKey({
+  type,
+  extension = 'pdf',
+  uploadedAt
+}: {
+  type: UploadType;
+  extension?: string;
+  uploadedAt: string;
+}): string {
 
-  return `uploads/${year}/${month}/${day}/${timestamp}-${randomSuffix}-${cleanedName}`;
+  const now = new Date(uploadedAt);
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDay() + 1).padStart(2, "0");
+  const caseId = caseIdGenerator({ type });
+
+  return `uploads/${year}/${month}/${day}/${caseId}.${extension}`;
 }
 
 function withCorsHeaders(headers?: HeadersInit): Headers {
@@ -104,7 +114,12 @@ export default {
       }
 
       const uploadedAt = new Date().toISOString();
-      const key = createObjectKey(filename, uploadedAt);
+      const requestedType = (new URL(request.url).searchParams.get('type') ?? 'cnc').toLowerCase();
+      if (!ALLOWED_UPLOAD_TYPES.includes(requestedType as UploadType)) {
+        return errorJson(`unsupported upload type; allowed: ${ALLOWED_UPLOAD_TYPES.join(', ')}`, 400);
+      }
+
+      const key = createObjectKey({ type: requestedType as UploadType, extension, uploadedAt });
       const contentType = normalizedMimeType || 'application/octet-stream';
 
       try {

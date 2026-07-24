@@ -2,6 +2,8 @@ import { fail } from '@sveltejs/kit';
 import { dev } from '$app/environment';
 import type { Actions, PageServerLoad } from './$types';
 
+const ALLOWED_UPLOAD_TYPES = ['cnc'] as const;
+
 interface WorkerUploadResponse {
   upload: {
     key: string;
@@ -21,9 +23,17 @@ export const load: PageServerLoad = async () => {
 };
 
 export const actions: Actions = {
-  default: async ({ request, platform }) => {
+  default: async ({ request, platform, url }) => {
     const formData = await request.formData();
     const uploadedFile = formData.get('file');
+    const requestedType = (url.searchParams.get('type') ?? 'cnc').toLowerCase();
+
+    if (!ALLOWED_UPLOAD_TYPES.includes(requestedType as (typeof ALLOWED_UPLOAD_TYPES)[number])) {
+      return fail(400, {
+        upload: null,
+        error: `unsupported upload type; allowed: ${ALLOWED_UPLOAD_TYPES.join(', ')}`
+      });
+    }
 
     if (!(uploadedFile instanceof File)) {
       return fail(400, {
@@ -49,13 +59,13 @@ export const actions: Actions = {
     }
 
     const workerBinding = platform?.env.WORKER;
-    const LOCAL_WORKER_UPLOAD_URL = 'http://127.0.0.1:8787/api/upload';
+    const LOCAL_WORKER_UPLOAD_URL = `http://127.0.0.1:8787/api/upload?type=${requestedType}`;
 
     try {
       const backendFormData = new FormData();
       backendFormData.append('file', uploadedFile, uploadedFile.name);
 
-      const backendRequest = new Request('https://worker.internal/api/upload', {
+      const backendRequest = new Request(`https://worker.internal/api/upload?type=${requestedType}`, {
         method: 'POST',
         body: backendFormData
       });
