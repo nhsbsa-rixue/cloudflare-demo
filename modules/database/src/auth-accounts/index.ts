@@ -1,5 +1,5 @@
 export {
   authAccounts,
   type AuthAccount,
-  type NewAuthAccount,
-} from "./schema";
+  type NewAuthAccount
+} from './schema';

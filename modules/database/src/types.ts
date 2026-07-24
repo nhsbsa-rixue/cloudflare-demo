@@ -1,9 +1,7 @@
 /**
  * Result type for database operations - allows type-safe error handling
  */
-export type Result<T, E = Error> =
-  | { ok: true; value: T }
-  | { ok: false; error: E };
+export type Result<T, E = Error> = { ok: true; value: T } | { ok: false; error: E };
 
 export function Ok<T>(value: T): Result<T> {
   return { ok: true, value };
@@ -26,7 +24,7 @@ export interface DbOperationOptions {
 export interface FilterOptions<T> {
   limit?: number;
   offset?: number;
-  orderBy?: Array<{ column: keyof T; direction: "asc" | "desc" }>;
+  orderBy?: Array<{ column: keyof T; direction: 'asc' | 'desc' }>;
 }
 
 /**
@@ -39,6 +37,6 @@ export class DatabaseError extends Error {
     public originalError?: unknown
   ) {
     super(message);
-    this.name = "DatabaseError";
+    this.name = 'DatabaseError';
   }
 }

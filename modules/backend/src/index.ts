@@ -32,7 +32,7 @@ function getExtension(filename: string): string {
   return filename.slice(lastDot + 1).toLowerCase();
 }
 
-function sanitizeFilename(filename: string): string {
+function _sanitizeFilename(filename: string): string {
   return filename
     .trim()
     .replace(/[^a-zA-Z0-9._-]+/g, '-')
@@ -50,11 +50,10 @@ function createObjectKey({
   extension?: string;
   uploadedAt: string;
 }): string {
-
   const now = new Date(uploadedAt);
   const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const day = String(now.getDate()).padStart(2, "0");
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
   const caseId = caseIdGenerator({ type });
 
   return `uploads/${year}/${month}/${day}/${caseId}.${extension}`;
@@ -63,7 +62,9 @@ function createObjectKey({
 function withCorsHeaders(headers?: HeadersInit): Headers {
   const merged = new Headers(CORS_HEADERS);
   if (headers) {
-    new Headers(headers).forEach((value, key) => merged.set(key, value));
+    for (const [key, value] of new Headers(headers)) {
+      merged.set(key, value);
+    }
   }
   return merged;
 }
