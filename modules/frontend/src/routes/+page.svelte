@@ -141,9 +141,6 @@
                     >{apiResult.contentType}</Text
                   >
                   <Text class="text-sm text-ink-muted-48 font-mono"
-                    >{apiResult.key}</Text
-                  >
-                  <Text class="text-sm text-ink-muted-48 font-mono"
                     >{apiResult.uploadedAt}</Text
                   >
                 </div>
