@@ -1,7 +1,4 @@
 import { and, eq } from 'drizzle-orm';
-import type { DrizzleD1Database } from 'drizzle-orm/d1';
-import { drizzle } from 'drizzle-orm/better-sqlite3';
-import type { Database } from 'better-sqlite3';
 
 import { cases, type NewCase, type Case } from './schema';
 import { DatabaseError, Ok, Err, type Result } from '../types';
@@ -11,10 +8,10 @@ import { DatabaseError, Ok, Err, type Result } from '../types';
  * Works with both Cloudflare D1 (production) and better-sqlite3 (local dev)
  */
 export class CasesHelper {
-  private db: DrizzleD1Database | ReturnType<typeof drizzle>;
+  private db: any;
 
-  constructor(database: DrizzleD1Database | Database) {
-    this.db = database && 'prepare' in database ? drizzle(database) : (database as DrizzleD1Database);
+  constructor(database: any) {
+    this.db = database;
   }
 
   /**

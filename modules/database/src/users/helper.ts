@@ -1,6 +1,4 @@
 import { eq } from 'drizzle-orm';
-import type { DrizzleD1Database } from 'drizzle-orm/d1';
-import type { Database } from 'better-sqlite3';
 
 import { users, type NewUser, type User } from './schema';
 import { DatabaseError, Ok, Err, type Result } from '../types';
@@ -10,9 +8,9 @@ import { DatabaseError, Ok, Err, type Result } from '../types';
  * Works with both Cloudflare D1 (production) and better-sqlite3 (local dev)
  */
 export class UsersHelper {
-  private db: DrizzleD1Database | Database;
+  private db: any;
 
-  constructor(database: DrizzleD1Database | Database) {
+  constructor(database: any) {
     this.db = database;
   }
 
@@ -60,7 +58,7 @@ export class UsersHelper {
    */
   async getAllUsers(options?: { limit?: number; offset?: number }): Promise<Result<User[]>> {
     try {
-      let query = this.db.select().from(users);
+      let query: any = this.db.select().from(users);
 
       if (options?.limit) {
         query = query.limit(options.limit);
