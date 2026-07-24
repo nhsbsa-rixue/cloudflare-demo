@@ -10,6 +10,8 @@
     "dev": "pnpm -r --parallel dev",
     "dev:backend": "pnpm --filter @cloudflare-demo/backend dev",
     "dev:frontend": "pnpm --filter @cloudflare-demo/frontend dev",
+    "db:apply": "pnpm --filter @cloudflare-demo/backend exec wrangler d1 migrations apply demo-db --remote",
+    "db:apply:local": "pnpm --filter @cloudflare-demo/backend exec wrangler d1 migrations apply demo-db --local",
     "build": "pnpm -r build",
     "deploy:frontend": "pnpm --filter @cloudflare-demo/frontend run deploy",
     "deploy:backend": "pnpm --filter @cloudflare-demo/backend run deploy",

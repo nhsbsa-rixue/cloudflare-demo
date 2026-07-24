@@ -1,0 +1,33 @@
+{
+  "name": "@cloudflare-demo/database",
+  "version": "1.0.1",
+  "description": "Database layer with Drizzle ORM for D1",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "check": "tsc --noEmit",
+    "migrate:generate": "drizzle-kit generate --config drizzle.config.ts",
+    "migrate:local": "drizzle-kit migrate --config drizzle.config.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "biome check .",
+    "format": "biome format --write ."
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.33.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.2.0",
+    "@types/better-sqlite3": "^7.6.11",
+    "better-sqlite3": "^11.8.0",
+    "drizzle-kit": "^0.24.2",
+    "typescript": "^5.0.0",
+    "vitest": "4.1.10"
+  }
+}

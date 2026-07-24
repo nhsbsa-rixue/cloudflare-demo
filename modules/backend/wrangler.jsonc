@@ -9,5 +9,13 @@
       "binding": "UPLOADS_BUCKET",
       "bucket_name": "files"
     }
+  ],
+  "d1_databases": [
+    {
+      "binding": "UPLOADS_DB",
+      "database_name": "demo-db",
+      "database_id": "cafa46dd-7670-4495-ab07-63eec486dcdb",
+      "migrations_dir": "../database/drizzle"
+    }
   ]
 }
