@@ -1,5 +1,6 @@
 import type { Env } from '../types';
 import { R2UploadError, R2UploadService, type UploadSuccessResponse } from '../services/r2-upload';
+import { CasesService } from '../services/cases';
 import { caseIdGenerator } from '../../../utils';
 
 const CORS_HEADERS: HeadersInit = {
@@ -49,6 +50,11 @@ export default {
         return errorJson('file is required', 400);
       }
 
+      const userId = formData.get('userId');
+      if (typeof userId !== 'string' || !userId.trim()) {
+        return errorJson('userId is required', 400);
+      }
+
       const uploadedAt = new Date().toISOString();
 
       if (!DEFAULT_ALLOWED_UPLOAD_TYPES.includes(typeParam)) {
@@ -57,7 +63,8 @@ export default {
 
       const caseId = caseIdGenerator(typeParam);
 
-      const uploadService = new R2UploadService(env.UPLOADS_BUCKET);
+      const uploadService = new R2UploadService(env);
+      const casesService = new CasesService(env);
 
       try {
         const result = await uploadService.upload({
@@ -69,6 +76,19 @@ export default {
         const payload: UploadSuccessResponse = {
           upload: result
         };
+
+        const casePayload = {
+          id: caseId,
+          userId: userId.trim(),
+          status: 'draft' as const,
+          imageUrl: result.key,
+          type: typeParam as 'cnc' | '3d' | 'other'
+        };
+
+        const createResult = await casesService.createCase(casePayload);
+        if (!createResult.ok) {
+          return errorJson(createResult.error.message, 400);
+        }
 
         return Response.json(payload, { headers: withCorsHeaders() });
       } catch (error) {
@@ -86,4 +106,4 @@ export default {
 
     return errorJson('Not Found', 404);
   }
-} satisfies ExportedHandler<Env>;
+} as ExportedHandler<Env>;

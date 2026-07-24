@@ -23,13 +23,10 @@ export const authAccounts = sqliteTable(
       .notNull()
       .default(sql`(cast((julianday('now') - 2440587.5)*86400000 as integer))`)
   },
-  (table) => ({
-    userIdIdx: index('auth_accounts_user_id_idx').on(table.userId),
-    providerAccountUnique: uniqueIndex('auth_accounts_provider_account_unique').on(
-      table.provider,
-      table.providerAccountId
-    )
-  })
+  (table) => [
+    index('auth_accounts_user_id_idx').on(table.userId),
+    uniqueIndex('auth_accounts_provider_account_unique').on(table.provider, table.providerAccountId)
+  ]
 );
 
 export type AuthAccount = typeof authAccounts.$inferSelect;

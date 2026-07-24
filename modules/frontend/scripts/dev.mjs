@@ -1,35 +1,47 @@
 import { spawn } from 'node:child_process';
+import { once } from 'node:events';
 import { fileURLToPath } from 'node:url';
 
 const cwd = fileURLToPath(new URL('..', import.meta.url));
+const isWin = process.platform === 'win32';
 
-function run(command, args, options = {}) {
-  return new Promise((resolve, reject) => {
-    const child = spawn(command, args, {
-      cwd,
-      shell: true,
-      stdio: 'inherit',
-      ...options
-    });
-
-    child.on('error', reject);
-    child.on('exit', (code, signal) => {
-      if (code === 0) {
-        resolve();
-        return;
-      }
-
-      reject(new Error(`${command} ${args.join(' ')} exited with ${signal ?? code}`));
-    });
-  });
+function resolveBin(name) {
+  return isWin ? `${name}.cmd` : name;
 }
 
 function start(command, args) {
-  return spawn(command, args, {
+  return spawn(resolveBin(command), args, {
     cwd,
-    shell: true,
-    stdio: 'inherit'
+    shell: false,
+    stdio: 'inherit',
+    detached: !isWin
   });
+}
+
+function killProcessTree(child, signal = 'SIGTERM') {
+  if (!child || child.exitCode !== null || child.killed) {
+    return;
+  }
+
+  if (isWin) {
+    child.kill(signal);
+    return;
+  }
+
+  try {
+    process.kill(-child.pid, signal);
+  } catch {
+    child.kill(signal);
+  }
+}
+
+async function run(command, args) {
+  const child = start(command, args);
+  const [code, signal] = await once(child, 'exit');
+
+  if (code !== 0) {
+    throw new Error(`${command} ${args.join(' ')} exited with ${signal ?? code}`);
+  }
 }
 
 async function main() {
@@ -47,42 +59,70 @@ async function main() {
   ]);
 
   const children = [buildWatch, pagesDev];
+  let stopping = false;
+  let userInitiatedStop = false;
 
-  const stopChildren = () => {
-    for (const child of children) {
-      if (!child.killed) {
-        child.kill('SIGINT');
-      }
+  const stopChildren = (signal = 'SIGTERM') => {
+    if (stopping) {
+      return;
     }
+
+    stopping = true;
+
+    for (const child of children) {
+      killProcessTree(child, signal);
+    }
+
+    setTimeout(() => {
+      for (const child of children) {
+        killProcessTree(child, 'SIGKILL');
+      }
+    }, 2500).unref();
   };
 
-  process.once('SIGINT', stopChildren);
-  process.once('SIGTERM', stopChildren);
+  process.once('SIGINT', () => {
+    userInitiatedStop = true;
+    stopChildren('SIGINT');
+  });
 
-  await new Promise((resolve, reject) => {
-    buildWatch.on('exit', (code, signal) => {
-      // If the watcher exits on its own, the dev environment is no longer valid.
-      if (signal === 'SIGINT' || signal === 'SIGTERM') {
-        resolve();
-        return;
-      }
+  process.once('SIGTERM', () => {
+    userInitiatedStop = true;
+    stopChildren('SIGTERM');
+  });
 
-      reject(new Error(`pnpm run build --watch exited with ${signal ?? code}`));
-    });
+  const firstExit = await Promise.race([
+    once(buildWatch, 'exit').then(([code, signal]) => ({
+      name: 'buildWatch',
+      code,
+      signal
+    })),
+    once(pagesDev, 'exit').then(([code, signal]) => ({
+      name: 'pagesDev',
+      code,
+      signal
+    }))
+  ]);
 
-    buildWatch.on('error', reject);
+  stopChildren('SIGTERM');
+  await Promise.allSettled(children.map((child) => once(child, 'exit')));
 
-    pagesDev.on('exit', (code, signal) => {
-      if (code === 0 || signal === 'SIGINT' || signal === 'SIGTERM') {
-        resolve();
-        return;
-      }
+  if (userInitiatedStop) {
+    return;
+  }
 
-      reject(new Error(`wrangler pages dev exited with ${signal ?? code}`));
-    });
+  if (firstExit.signal === 'SIGINT' || firstExit.signal === 'SIGTERM') {
+    return;
+  }
 
-    pagesDev.on('error', reject);
-  }).finally(stopChildren);
+  if (firstExit.name === 'pagesDev' && firstExit.code === 0) {
+    return;
+  }
+
+  throw new Error(
+    firstExit.name === 'buildWatch'
+      ? `pnpm run build --watch exited with ${firstExit.signal ?? firstExit.code}`
+      : `wrangler pages dev exited with ${firstExit.signal ?? firstExit.code}`
+  );
 }
 
 main().catch((error) => {

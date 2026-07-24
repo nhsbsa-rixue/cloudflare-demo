@@ -19,9 +19,7 @@ export const users = sqliteTable(
       .notNull()
       .default(sql`(cast((julianday('now') - 2440587.5)*86400000 as integer))`)
   },
-  (table) => ({
-    emailIdx: index('email_idx').on(table.email)
-  })
+  (table) => [index('email_idx').on(table.email)]
 );
 
 /**
