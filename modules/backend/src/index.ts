@@ -54,7 +54,7 @@ function createObjectKey({
   const now = new Date(uploadedAt);
   const year = now.getFullYear();
   const month = String(now.getMonth() + 1).padStart(2, "0");
-  const day = String(now.getDay() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
   const caseId = caseIdGenerator({ type });
 
   return `uploads/${year}/${month}/${day}/${caseId}.${extension}`;
