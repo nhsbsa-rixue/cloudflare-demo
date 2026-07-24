@@ -1,108 +1,13 @@
-/**
- * Example API routes for database operations
- * This file demonstrates how to use the DatabaseHelper in route handlers
- */
-
-import { initializeDatabaseClient } from '../db-client';
+import { initializeDatabaseClient } from './db-client';
 import type { Env } from '../types';
-import { generateId } from '@cloudflare-demo/utils';
+import { caseIdGenerator } from '../../../utils';
 
-/**
- * POST /api/users - Create a new user
- */
-export async function createUserHandler(request: Request, env: Env) {
-  const db = initializeDatabaseClient(env);
-
-  try {
-    const body = (await request.json()) as {
-      name: string;
-      email: string;
-      role?: string;
-    };
-
-    const result = await db.users.insertUser({
-      id: generateId(),
-      name: body.name,
-      email: body.email,
-      role: body.role || 'user'
-    });
-
-    if (!result.ok) {
-      return new Response(
-        JSON.stringify({
-          error: result.error.message,
-          code: result.error.code
-        }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
-      );
-    }
-
-    return new Response(JSON.stringify({ user: result.value }), {
-      status: 201,
-      headers: { 'Content-Type': 'application/json' }
-    });
-  } catch (error) {
-    return new Response(
-      JSON.stringify({
-        error: 'Invalid request',
-        details: error instanceof Error ? error.message : String(error)
-      }),
-      { status: 400, headers: { 'Content-Type': 'application/json' } }
-    );
+function getErrorCode(error: unknown): string | undefined {
+  if (typeof error === 'object' && error !== null && 'code' in error) {
+    const maybeCode = (error as { code?: unknown }).code;
+    return typeof maybeCode === 'string' ? maybeCode : undefined;
   }
-}
-
-/**
- * GET /api/users/:id - Get a user by ID
- */
-export async function getUserHandler(_request: Request, env: Env, id: string) {
-  const db = initializeDatabaseClient(env);
-
-  const result = await db.users.getUser(id);
-
-  if (!result.ok) {
-    return new Response(JSON.stringify({ error: result.error.message }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    });
-  }
-
-  if (!result.value) {
-    return new Response(JSON.stringify({ error: 'User not found' }), {
-      status: 404,
-      headers: { 'Content-Type': 'application/json' }
-    });
-  }
-
-  return new Response(JSON.stringify({ user: result.value }), {
-    status: 200,
-    headers: { 'Content-Type': 'application/json' }
-  });
-}
-
-/**
- * GET /api/users - Get all users
- */
-export async function getAllUsersHandler(request: Request, env: Env) {
-  const db = initializeDatabaseClient(env);
-
-  const url = new URL(request.url);
-  const limit = parseInt(url.searchParams.get('limit') || '10', 10);
-  const offset = parseInt(url.searchParams.get('offset') || '0', 10);
-
-  const result = await db.users.getAllUsers({ limit, offset });
-
-  if (!result.ok) {
-    return new Response(JSON.stringify({ error: result.error.message }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    });
-  }
-
-  return new Response(JSON.stringify({ users: result.value }), {
-    status: 200,
-    headers: { 'Content-Type': 'application/json' }
-  });
+  return undefined;
 }
 
 /**
@@ -116,18 +21,18 @@ export async function createCaseHandler(request: Request, env: Env) {
       title: string;
       description?: string;
       userId: string;
-      status?: string;
-      priority?: string;
+      status?: 'draft' | 'active' | 'completed' | 'archived';
+      priority?: 'low' | 'medium' | 'high';
       estimatedCost?: number;
     };
 
     const result = await db.cases.insertCase({
-      id: generateId(),
-      title: body.title,
-      description: body.description,
+      id: caseIdGenerator(),
       userId: body.userId,
       status: (body.status as 'draft' | 'active' | 'completed' | 'archived') || 'draft',
-      priority: (body.priority as 'low' | 'medium' | 'high') || 'medium',
+      title: body.title,
+      description: body.description,
+      priority: body.priority,
       estimatedCost: body.estimatedCost
     });
 
@@ -135,7 +40,7 @@ export async function createCaseHandler(request: Request, env: Env) {
       return new Response(
         JSON.stringify({
           error: result.error.message,
-          code: result.error.code
+          code: getErrorCode(result.error)
         }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
@@ -193,7 +98,7 @@ export async function getUserCasesHandler(request: Request, env: Env, userId: st
   const url = new URL(request.url);
   const limit = parseInt(url.searchParams.get('limit') || '10', 10);
   const offset = parseInt(url.searchParams.get('offset') || '0', 10);
-  const status = url.searchParams.get('status');
+  const status = url.searchParams.get('status') ?? undefined;
 
   const result = await db.cases.getCasesByUser(userId, { limit, offset, status });
 
@@ -228,13 +133,18 @@ export async function updateCaseHandler(request: Request, env: Env, id: string) 
       actualCost?: number;
     };
 
-    const result = await db.cases.updateCase(id, body);
+    const updates = {
+      ...body,
+      dueDate: body.dueDate === undefined ? undefined : new Date(body.dueDate)
+    };
+
+    const result = await db.cases.updateCase(id, updates);
 
     if (!result.ok) {
       return new Response(
         JSON.stringify({
           error: result.error.message,
-          code: result.error.code
+          code: getErrorCode(result.error)
         }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );

@@ -1,7 +1,7 @@
 import { drizzle } from 'drizzle-orm/d1';
-import { getDatabaseHelper } from '@cloudflare-demo/database';
-import type { DatabaseHelper } from '@cloudflare-demo/database';
-import type { Env } from './types';
+import { getDatabaseHelper } from '../../../database';
+import type { DatabaseHelper } from '../../../database';
+import type { Env } from '../types';
 
 /**
  * Initialize and return a combined DatabaseHelper instance for D1

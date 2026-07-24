@@ -4,7 +4,7 @@ type CaseIdGeneratorOptions = {
   type?: string;
 };
 
-export const caseIdGenerator = ({ type = "cnc" }: CaseIdGeneratorOptions = {}): string => {
+export const caseIdGenerator = (type: string = "cnc", options: CaseIdGeneratorOptions = {}): string => {
   const now = new Date();
 
   now.toDateString();
@@ -15,3 +15,7 @@ export const caseIdGenerator = ({ type = "cnc" }: CaseIdGeneratorOptions = {}): 
 
   return `${type}-${year}${month}${day}-${randomSuffix}`;
 };
+
+export const userIdGenerator = (): string => {
+  return crypto.randomUUID();
+}
