@@ -119,6 +119,14 @@
                 </Button>
               </form>
 
+              {#if apiError}
+                <div class="p-4 rounded-lg bg-red-50 border border-red-200" aria-live="polite" role="alert">
+                  <Text class="text-sm font-semibold text-red-800">
+                    {apiError}
+                  </Text>
+                </div>
+              {/if}
+
               {#if hasSelectedFile && droppedFile}
                 <div aria-live="polite">
                   <Text class="text-sm text-ink">
@@ -127,9 +135,7 @@
                 </div>
               {/if}
 
-              {#if apiError && hasSelectedFile}
-                <Text class="text-sm text-red-600 font-mono">{apiError}</Text>
-              {:else if apiResult}
+              {#if apiResult}
                 <div class="space-y-2">
                   <Text class="text-xl font-semibold text-ink"
                     >Upload complete</Text

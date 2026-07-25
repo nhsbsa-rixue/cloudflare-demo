@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "wrangler dev",
-    "build": "wrangler deploy --dry-run",
+    "build": "pnpm run format && pnpm run lint && wrangler deploy --dry-run",
     "deploy": "wrangler deploy",
     "check": "tsc --noEmit",
     "test": "vitest run",

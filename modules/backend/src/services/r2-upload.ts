@@ -1,10 +1,8 @@
 import type { Env } from '../types';
 
-
 const DEFAULT_ALLOWED_EXTENSIONS = new Set(['png', 'jpg', 'jpeg', 'pdf']);
 const DEFAULT_ALLOWED_MIME_TYPES = new Set(['image/png', 'image/jpeg', 'application/pdf']);
 const DEFAULT_MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
-
 
 export interface UploadSuccessResponse {
   upload: {
@@ -73,13 +71,10 @@ function createObjectKey({
 }
 
 export class R2UploadService {
-private readonly bucket;
-private readonly options: R2UploadServiceOptions;
+  private readonly bucket;
+  private readonly options: R2UploadServiceOptions;
 
-  constructor(
-     env: Env,
-     options: R2UploadServiceOptions = {}
-  ) {
+  constructor(env: Env, options: R2UploadServiceOptions = {}) {
     this.bucket = env.UPLOADS_BUCKET;
     this.options = options;
   }

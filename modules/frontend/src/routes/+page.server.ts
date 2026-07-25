@@ -1,8 +1,10 @@
 import { fail } from '@sveltejs/kit';
-import { dev } from '$app/environment';
 import type { Actions, PageServerLoad } from './$types';
+import { dev } from '$app/environment';
 
-const ALLOWED_UPLOAD_TYPES = ['cnc'] as const;
+const LOCAL_WORKER_UPLOAD_URL = 'http://127.0.0.1:8787/api/upload?type=cnc';
+const WORKER_UPLOAD_URL = 'https://worker.internal/api/upload?type=cnc';
+const MOCK_USER_ID = '1111';
 
 interface WorkerUploadResponse {
   upload: {
@@ -23,17 +25,9 @@ export const load: PageServerLoad = async () => {
 };
 
 export const actions: Actions = {
-  default: async ({ request, platform, url }) => {
+  default: async ({ request, platform }) => {
     const formData = await request.formData();
     const uploadedFile = formData.get('file');
-    const requestedType = (url.searchParams.get('type') ?? 'cnc').toLowerCase();
-
-    if (!ALLOWED_UPLOAD_TYPES.includes(requestedType as (typeof ALLOWED_UPLOAD_TYPES)[number])) {
-      return fail(400, {
-        upload: null,
-        error: `unsupported upload type; allowed: ${ALLOWED_UPLOAD_TYPES.join(', ')}`
-      });
-    }
 
     if (!(uploadedFile instanceof File)) {
       return fail(400, {
@@ -58,28 +52,18 @@ export const actions: Actions = {
       });
     }
 
-    const workerBinding = platform?.env.WORKER;
-    const LOCAL_WORKER_UPLOAD_URL = `http://127.0.0.1:8787/api/upload?type=${requestedType}`;
-
     try {
-      const backendFormData = new FormData();
-      backendFormData.append('file', uploadedFile, uploadedFile.name);
+      const formData = new FormData();
+      formData.append('file', uploadedFile, uploadedFile.name);
+      formData.append('userId', MOCK_USER_ID);
 
-      const backendRequest = new Request(`https://worker.internal/api/upload?type=${requestedType}`, {
+      const uploadUrl = dev ? LOCAL_WORKER_UPLOAD_URL : LOCAL_WORKER_UPLOAD_URL;
+      const backendRequest = new Request(uploadUrl, {
         method: 'POST',
-        body: backendFormData
+        body: formData
       });
-
-      const response = workerBinding
-        ? await workerBinding.fetch(backendRequest)
-        : dev
-          ? await fetch(
-              new Request(LOCAL_WORKER_UPLOAD_URL, {
-                method: 'POST',
-                body: backendFormData
-              })
-            )
-          : null;
+      console.log('uploadUrl', uploadUrl);
+      const response = await fetch(uploadUrl, backendRequest);
 
       if (!response) {
         return fail(503, {
