@@ -57,7 +57,7 @@ export const actions: Actions = {
       formData.append('file', uploadedFile, uploadedFile.name);
       formData.append('userId', MOCK_USER_ID);
 
-      const uploadUrl = dev ? LOCAL_WORKER_UPLOAD_URL : LOCAL_WORKER_UPLOAD_URL;
+      const uploadUrl = dev ? LOCAL_WORKER_UPLOAD_URL : WORKER_UPLOAD_URL;
       const backendRequest = new Request(uploadUrl, {
         method: 'POST',
         body: formData
