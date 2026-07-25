@@ -2,8 +2,8 @@ import { fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { dev } from '$app/environment';
 
-const LOCAL_WORKER_UPLOAD_URL = 'http://127.0.0.1:8787/api/upload?type=cnc';
-const WORKER_UPLOAD_URL = 'https://worker.internal/api/upload?type=cnc';
+const LOCAL_UPLOAD_URL = 'http://127.0.0.1:8787/api/upload?type=cnc';
+const UPLOAD_PATH = '/api/upload?type=cnc';
 const MOCK_USER_ID = '1111';
 
 interface WorkerUploadResponse {
@@ -52,25 +52,22 @@ export const actions: Actions = {
       });
     }
 
-    try {
-      const formData = new FormData();
-      formData.append('file', uploadedFile, uploadedFile.name);
-      formData.append('userId', MOCK_USER_ID);
-
-      const uploadUrl = dev ? LOCAL_WORKER_UPLOAD_URL : WORKER_UPLOAD_URL;
-      const backendRequest = new Request(uploadUrl, {
-        method: 'POST',
-        body: formData
+    if (!dev && !platform?.env?.WORKER) {
+      return fail(503, {
+        upload: null,
+        error: 'Upload service currently unavailable'
       });
-      console.log('uploadUrl', uploadUrl);
-      const response = await fetch(uploadUrl, backendRequest);
+    }
 
-      if (!response) {
-        return fail(503, {
-          upload: null,
-          error: 'Upload service currently unavailable'
-        });
-      }
+    try {
+      const body = new FormData();
+      body.append('file', uploadedFile, uploadedFile.name);
+      body.append('userId', MOCK_USER_ID);
+      const requestInit = { method: 'POST', body };
+
+      const response = dev
+        ? await fetch(LOCAL_UPLOAD_URL, requestInit)
+        : await platform!.env.WORKER!.fetch(LOCAL_UPLOAD_URL, requestInit);
 
       if (!response.ok) {
         const errorPayload = (await response.json().catch(() => null)) as { error?: string } | null;
