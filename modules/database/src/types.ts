@@ -1,3 +1,13 @@
+import type { BaseSQLiteDatabase } from 'drizzle-orm/sqlite-core';
+
+/**
+ * Shared Drizzle database type used by all helpers.
+ *
+ * `BaseSQLiteDatabase` is the common base of both `DrizzleD1Database` (async, production)
+ * and `BetterSQLite3Database` (sync, local dev), so helpers stay type-safe across environments.
+ */
+export type AppDatabase = BaseSQLiteDatabase<'sync' | 'async', unknown>;
+
 /**
  * Result type for database operations - allows type-safe error handling
  */

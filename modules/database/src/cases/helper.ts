@@ -1,16 +1,16 @@
 import { and, eq } from 'drizzle-orm';
 
 import { cases, type NewCase, type Case } from './schema';
-import { DatabaseError, Ok, Err, type Result } from '../types';
+import { DatabaseError, Ok, Err, type Result, type AppDatabase } from '../types';
 
 /**
  * CasesHelper class - wraps all case CRUD operations
  * Works with both Cloudflare D1 (production) and better-sqlite3 (local dev)
  */
 export class CasesHelper {
-  private db: any;
+  private db: AppDatabase;
 
-  constructor(database: any) {
+  constructor(database: AppDatabase) {
     this.db = database;
   }
 
@@ -19,11 +19,11 @@ export class CasesHelper {
    */
   async insertCase(caseData: NewCase): Promise<Result<Case>> {
     try {
-      const result = await this.db.insert(cases).values(caseData).returning();
-      if (result.length === 0) {
+      const [inserted] = await this.db.insert(cases).values(caseData).returning();
+      if (!inserted) {
         return Err(new DatabaseError('Failed to insert case'));
       }
-      return Ok(result[0]);
+      return Ok(inserted);
     } catch (error) {
       return Err(new DatabaseError('Failed to insert case', 'INSERT_CASE_ERROR', error));
     }
@@ -34,8 +34,8 @@ export class CasesHelper {
    */
   async getCase(id: string): Promise<Result<Case | null>> {
     try {
-      const result = await this.db.select().from(cases).where(eq(cases.id, id));
-      return Ok(result.length > 0 ? result[0] : null);
+      const [found] = await this.db.select().from(cases).where(eq(cases.id, id));
+      return Ok(found ?? null);
     } catch (error) {
       return Err(new DatabaseError('Failed to fetch case', 'GET_CASE_ERROR', error));
     }
@@ -46,7 +46,7 @@ export class CasesHelper {
    */
   async getAllCases(options?: { limit?: number; offset?: number; status?: string }): Promise<Result<Case[]>> {
     try {
-      let query: any = this.db.select().from(cases);
+      let query = this.db.select().from(cases).$dynamic();
 
       if (options?.status) {
         query = query.where(eq(cases.status, options.status as 'draft' | 'active' | 'completed' | 'archived'));
@@ -78,7 +78,7 @@ export class CasesHelper {
     }
   ): Promise<Result<Case[]>> {
     try {
-      let query = this.db.select().from(cases).where(eq(cases.userId, userId)) as any;
+      let query = this.db.select().from(cases).where(eq(cases.userId, userId)).$dynamic();
 
       if (options?.status) {
         query = query.where(
@@ -108,7 +108,7 @@ export class CasesHelper {
    */
   async updateCase(id: string, updates: Partial<Omit<Case, 'id' | 'createdAt'>>): Promise<Result<Case>> {
     try {
-      const result = await this.db
+      const [updated] = await this.db
         .update(cases)
         .set({
           ...updates,
@@ -117,10 +117,10 @@ export class CasesHelper {
         .where(eq(cases.id, id))
         .returning();
 
-      if (result.length === 0) {
+      if (!updated) {
         return Err(new DatabaseError('Case not found', 'CASE_NOT_FOUND'));
       }
-      return Ok(result[0]);
+      return Ok(updated);
     } catch (error) {
       return Err(new DatabaseError('Failed to update case', 'UPDATE_CASE_ERROR', error));
     }
@@ -150,12 +150,13 @@ export class CasesHelper {
     }
   ): Promise<Result<Case[]>> {
     try {
-      let query: any = this.db
+      let query = this.db
         .select()
         .from(cases)
         .where(
           and(eq(cases.userId, userId), eq(cases.status, status as 'draft' | 'active' | 'completed' | 'archived'))
-        );
+        )
+        .$dynamic();
 
       if (options?.limit) {
         query = query.limit(options.limit);

@@ -1,16 +1,16 @@
 import { eq } from 'drizzle-orm';
 
 import { users, type NewUser, type User } from './schema';
-import { DatabaseError, Ok, Err, type Result } from '../types';
+import { DatabaseError, Ok, Err, type Result, type AppDatabase } from '../types';
 
 /**
  * UsersHelper class - wraps all user CRUD operations
  * Works with both Cloudflare D1 (production) and better-sqlite3 (local dev)
  */
 export class UsersHelper {
-  private db: any;
+  private db: AppDatabase;
 
-  constructor(database: any) {
+  constructor(database: AppDatabase) {
     this.db = database;
   }
 
@@ -19,11 +19,11 @@ export class UsersHelper {
    */
   async insertUser(user: NewUser): Promise<Result<User>> {
     try {
-      const result = await this.db.insert(users).values(user).returning();
-      if (result.length === 0) {
+      const [inserted] = await this.db.insert(users).values(user).returning();
+      if (!inserted) {
         return Err(new DatabaseError('Failed to insert user'));
       }
-      return Ok(result[0]);
+      return Ok(inserted);
     } catch (error) {
       return Err(new DatabaseError('Failed to insert user', 'INSERT_USER_ERROR', error));
     }
@@ -34,8 +34,8 @@ export class UsersHelper {
    */
   async getUser(id: string): Promise<Result<User | null>> {
     try {
-      const result = await this.db.select().from(users).where(eq(users.id, id));
-      return Ok(result.length > 0 ? result[0] : null);
+      const [found] = await this.db.select().from(users).where(eq(users.id, id));
+      return Ok(found ?? null);
     } catch (error) {
       return Err(new DatabaseError('Failed to fetch user', 'GET_USER_ERROR', error));
     }
@@ -46,8 +46,8 @@ export class UsersHelper {
    */
   async getUserByEmail(email: string): Promise<Result<User | null>> {
     try {
-      const result = await this.db.select().from(users).where(eq(users.email, email));
-      return Ok(result.length > 0 ? result[0] : null);
+      const [found] = await this.db.select().from(users).where(eq(users.email, email));
+      return Ok(found ?? null);
     } catch (error) {
       return Err(new DatabaseError('Failed to fetch user by email', 'GET_USER_BY_EMAIL_ERROR', error));
     }
@@ -58,7 +58,7 @@ export class UsersHelper {
    */
   async getAllUsers(options?: { limit?: number; offset?: number }): Promise<Result<User[]>> {
     try {
-      let query: any = this.db.select().from(users);
+      let query = this.db.select().from(users).$dynamic();
 
       if (options?.limit) {
         query = query.limit(options.limit);
@@ -79,7 +79,7 @@ export class UsersHelper {
    */
   async updateUser(id: string, updates: Partial<Omit<User, 'id' | 'createdAt'>>): Promise<Result<User>> {
     try {
-      const result = await this.db
+      const [updated] = await this.db
         .update(users)
         .set({
           ...updates,
@@ -88,10 +88,10 @@ export class UsersHelper {
         .where(eq(users.id, id))
         .returning();
 
-      if (result.length === 0) {
+      if (!updated) {
         return Err(new DatabaseError('User not found', 'USER_NOT_FOUND'));
       }
-      return Ok(result[0]);
+      return Ok(updated);
     } catch (error) {
       return Err(new DatabaseError('Failed to update user', 'UPDATE_USER_ERROR', error));
     }

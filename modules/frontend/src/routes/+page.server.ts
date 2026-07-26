@@ -1,20 +1,11 @@
 import { fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { dev } from '$app/environment';
+import type { WorkerUploadResponse } from '$lib/types';
 
 const LOCAL_UPLOAD_URL = 'http://127.0.0.1:8787/api/upload?type=cnc';
 const UPLOAD_PATH = '/api/upload?type=cnc';
 const MOCK_USER_ID = '1111';
-
-interface WorkerUploadResponse {
-  upload: {
-    key: string;
-    filename: string;
-    contentType: string;
-    size: number;
-    uploadedAt: string;
-  };
-}
 
 // This runs on the server (Cloudflare Pages edge) — never exposed to the browser.
 export const load: PageServerLoad = async () => {

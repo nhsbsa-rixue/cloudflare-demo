@@ -5,7 +5,8 @@ export {
   Err,
   type Result,
   type DbOperationOptions,
-  type FilterOptions
+  type FilterOptions,
+  type AppDatabase
 } from './types';
 
 // Re-export users module
