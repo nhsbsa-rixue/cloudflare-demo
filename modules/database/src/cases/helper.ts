@@ -153,9 +153,7 @@ export class CasesHelper {
       let query = this.db
         .select()
         .from(cases)
-        .where(
-          and(eq(cases.userId, userId), eq(cases.status, status as 'draft' | 'active' | 'completed' | 'archived'))
-        )
+        .where(and(eq(cases.userId, userId), eq(cases.status, status as 'draft' | 'active' | 'completed' | 'archived')))
         .$dynamic();
 
       if (options?.limit) {

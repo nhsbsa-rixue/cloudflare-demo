@@ -4,7 +4,6 @@ import { dev } from '$app/environment';
 import type { WorkerUploadResponse } from '$lib/types';
 
 const LOCAL_UPLOAD_URL = 'http://127.0.0.1:8787/api/upload?type=cnc';
-const UPLOAD_PATH = '/api/upload?type=cnc';
 const MOCK_USER_ID = '1111';
 
 // This runs on the server (Cloudflare Pages edge) — never exposed to the browser.
@@ -58,7 +57,7 @@ export const actions: Actions = {
 
       const response = dev
         ? await fetch(LOCAL_UPLOAD_URL, requestInit)
-        : await platform!.env.WORKER!.fetch(LOCAL_UPLOAD_URL, requestInit);
+        : await platform?.env.WORKER?.fetch(LOCAL_UPLOAD_URL, requestInit);
 
       if (!response.ok) {
         const errorPayload = (await response.json().catch(() => null)) as { error?: string } | null;

@@ -16,3 +16,4 @@ overrides:
   sharp: '>=0.35.0'
   esbuild: '>=0.24.3'
   cookie: '>=0.7.0'
+  postcss: '>=8.5.18'
