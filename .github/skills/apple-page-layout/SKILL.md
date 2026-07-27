@@ -1,12 +1,12 @@
 ---
 name: apple-page-layout
-description: 'Generate consistent Svelte page layouts matching the Apple design system (DESIGN.md). Use when: creating new pages, building page templates, scaffolding routes, page layout, new route, consistent UI, Apple style page, product tile page, form page, grid page, landing page.'
+description: 'Generate consistent, subtly animated Svelte page layouts matching the Apple design system. Use when: creating new pages, building page templates, scaffolding routes, page layout, new route, consistent UI, Apple style page, product tile page, form page, grid page, landing page, scroll reveal, hero entrance animation, motion.'
 argument-hint: 'Describe the page purpose (e.g., "product listing grid" or "upload form")'
 ---
 
 # Apple Design Page Layout Generator
 
-Generate consistent Svelte 5 page layouts for the frontend project (`modules/frontend/`) that follow the Apple design system defined in `.github/prompts/DESIGN.md`, using the existing shadcn-style component library.
+Generate consistent Svelte 5 page layouts for the frontend project (`modules/frontend/`) that follow the repo's Apple design system, using the existing shadcn-style component library. Design tokens are the single source of truth and live in `modules/frontend/src/app.css` under the `@theme` block.
 
 ## When to Use
 
@@ -42,11 +42,118 @@ Tokens are defined in `modules/frontend/src/app.css` via `@theme`. Key classes:
 - **Shadow**: `shadow-product` (only on product imagery)
 - **Font**: `font-display` (headlines), `font-sans` (body)
 
+## Motion & Interaction
+
+Motion here is **restrained and Apple-like** — content quietly settles into place; it never
+performs. Use it to guide the eye, not to decorate. Everything is Svelte-native
+(`svelte/transition`, an `IntersectionObserver`, or CSS) — **no animation libraries**.
+
+### Motion tokens
+
+| Token | Value | Use |
+|-------|-------|-----|
+| Fast | `150ms` | Color/opacity hovers, button press |
+| Base | `300ms` | Small hover lifts, fades |
+| Reveal | `600ms` | Scroll-in reveals, hero entrance |
+| Easing | `ease-out` (`cubic-bezier(0.16, 1, 0.3, 1)` for reveals) | Everything decelerates in |
+| Stagger step | `80ms` | Delay between sequential elements |
+| Travel | ≤ `translate-y-4` (16px) | Max distance any element moves |
+
+### Staggered hero entrance
+
+Let the standard tile stack (Heading → Lead → Buttons) settle in sequence on load. Use
+`svelte/transition` `fly` with an incremental `delay`. Keep travel small and `in:` only.
+
+```svelte
+<script lang="ts">
+  import { fly } from "svelte/transition";
+  import { cubicOut } from "svelte/easing";
+  import { Button } from "$lib/components/ui/button/index.js";
+  import { Card } from "$lib/components/ui/card/index.js";
+  import { Heading, Lead } from "$lib/components/ui/typography/index.js";
+
+  const rise = (delay: number) => ({ y: 16, duration: 600, delay, easing: cubicOut });
+</script>
+
+<Card variant="tile" tileMode="light">
+  <div class="mx-auto max-w-4xl text-center flex flex-col items-center gap-4">
+    <div in:fly={rise(0)}><Heading level={1}>Product Name</Heading></div>
+    <div in:fly={rise(80)}><Lead>One-line tagline describing the product.</Lead></div>
+    <div in:fly={rise(160)} class="flex gap-4 mt-4">
+      <Button variant="primary" size="pill" label="Learn more" />
+      <Button variant="ghost" size="pill" label="Buy" />
+    </div>
+  </div>
+</Card>
+```
+
+> Svelte transitions are automatically disabled when the OS requests reduced motion, so
+> `fly`/`fade` are safe by default.
+
+### Reveal on scroll
+
+For sections below the fold, fade + rise them into view as the user scrolls. Prefer the
+pure-CSS approach (no JS) using scroll-driven animations, gated behind
+`prefers-reduced-motion`:
+
+```svelte
+<section class="reveal">
+  <Card variant="tile" tileMode="parchment">…</Card>
+</section>
+
+<style>
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal {
+      animation: reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 40%;
+    }
+    @keyframes reveal {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  }
+</style>
+```
+
+If you need broader browser support, use a tiny `IntersectionObserver` that toggles a
+class — start hidden (`opacity-0 translate-y-4`), transition to
+`opacity-100 translate-y-0` over `600ms ease-out` on intersect. Never hide content when
+JS is unavailable: default to visible, then enhance.
+
+### Micro-interactions
+
+- **Utility cards**: gentle lift on hover — `transition-transform duration-300 hover:-translate-y-0.5`. No shadow change.
+- **Buttons**: add `active:scale-95 transition-transform` for a tactile press. Keep the built-in `transition-colors` for hover.
+- **Frosted depth**: reuse `backdrop-blur` (as `SubNav` already does) for sticky bars and overlays instead of adding shadows or gradients.
+
+### Fluid hero typography (optional)
+
+For hero `Heading level={1}` on very wide viewports, you may scale fluidly with `clamp()`
+while keeping the 300/400/600/700 weight ladder — e.g.
+`class="[font-size:clamp(2.5rem,6vw,4.5rem)]"`. Reserve this for the top-fold headline
+only; all other headings use the fixed `app.css` sizes.
+
+### Texture (use sparingly)
+
+A near-invisible grain can warm up large flat surfaces. Keep it optional and barely
+perceptible so the layout stays Apple-clean:
+`mix-blend-mode: overlay` at `opacity: 0.02–0.04`. Never on text or product imagery.
+
+### Performance & accessibility
+
+- **Animate only `transform` and `opacity`.** Never animate `width`, `height`, `top`, `left`, or `margin` — they trigger layout.
+- Apply `will-change: transform` only to elements actively moving, and drop it once the animation ends.
+- Wrap all continuous/scroll motion in `@media (prefers-reduced-motion: no-preference)`.
+- Gate hover-only effects behind `@media (hover: hover)` so touch devices stay crisp.
+
 ## Page Layout Templates
 
 ### Template 1: Hero Landing Page
 
-Full-bleed tiles alternating light/dark, centered content, photography-first.
+Full-bleed tiles alternating light/dark, centered content, photography-first. For the
+load-in animation and scroll reveals, apply the patterns from **Motion & Interaction**
+(staggered `fly` on the hero stack; `.reveal` on sections below the fold).
 
 ```svelte
 <script lang="ts">
@@ -174,9 +281,11 @@ Multi-column utility card grid for store, product listing, or dashboard views.
 10. **Typography hierarchy**: `Heading level={1}` for hero → `Heading level={2}` for section → `Heading level={3}` for card titles → `Text` for body → `Caption` for metadata.
 11. **Spacing**: Tiles use `py-spacing-section` (80px). Grid gaps use `gap-6`. Card internal padding is `p-6`.
 12. **Dark tile text**: Use `class="text-body-on-dark"` on Heading, and `class="text-body-muted"` on Lead/Text.
-13. **Active state**: Buttons already have `active:scale-95` built in — do not add custom press states.
+13. **Active state**: Buttons only ship with `transition-colors` — add `active:scale-95 transition-transform` yourself when you want a press effect.
 14. **Responsive grid columns**: 1-col → 2-col (sm) → 3-col (lg) → 4-col (xl). Follow the Apple breakpoint pattern.
 15. **Form pages** wrap content in `<main class="min-h-screen bg-canvas-parchment flex items-start justify-center px-6 py-spacing-section">`.
+16. **Motion is restrained**: only animate `transform` and `opacity`, keep travel ≤ `translate-y-4` and reveals ≤ `600ms`, and gate scroll/continuous motion behind `@media (prefers-reduced-motion: no-preference)`.
+17. **Stay Svelte-native**: use `svelte/transition`, CSS `animation-timeline`, or a small `IntersectionObserver` — never pull in an animation library. No parallax, scroll-hijacking, or magnetic-cursor effects.
 
 ## File Conventions
 
@@ -193,3 +302,7 @@ Multi-column utility card grid for store, product listing, or dashboard views.
 - **Don't** use weight 500 — the Apple ladder is 300/400/600/700
 - **Don't** add borders to tile sections — color change IS the divider
 - **Don't** use `text-primary-on-dark` (#2997ff) on light surfaces — it's dark-tile-only
+- **Don't** reach for GSAP, Framer Motion, Lenis, React Three Fiber, or any animation library — this repo is Svelte-native
+- **Don't** add neon glows, brutalist oversized type, looping/infinite animations, or attention-grabbing motion — it breaks the Apple calm
+- **Don't** animate layout properties (`width`, `height`, `top`, `margin`) — animate `transform`/`opacity` only
+- **Don't** move elements more than `translate-y-4` or run reveals longer than `600ms`

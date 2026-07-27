@@ -25,4 +25,4 @@ dist
 
 .wrangler
 
-.DS_Store
+**/.DS_Store

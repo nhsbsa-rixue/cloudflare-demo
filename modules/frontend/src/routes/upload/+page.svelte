@@ -15,7 +15,6 @@
   const title = "CNC Demo Upload";
   let droppedFile = $state<File | null>(null);
 
-  const apiResult = $derived(form?.upload ?? data.upload);
   const apiError = $derived(form?.error ?? data.error);
   const hasSelectedFile = $derived(!!droppedFile);
 
@@ -132,23 +131,6 @@
                   <Text class="text-sm text-ink">
                     Ready to upload: {droppedFile.name}
                   </Text>
-                </div>
-              {/if}
-
-              {#if apiResult}
-                <div class="space-y-2">
-                  <Text class="text-xl font-semibold text-ink"
-                    >Upload complete</Text
-                  >
-                  <Text class="text-sm text-ink-muted-48">
-                    {apiResult.filename} ({apiResult.size} bytes)
-                  </Text>
-                  <Text class="text-sm text-ink-muted-48 font-mono"
-                    >{apiResult.contentType}</Text
-                  >
-                  <Text class="text-sm text-ink-muted-48 font-mono"
-                    >{apiResult.uploadedAt}</Text
-                  >
                 </div>
               {/if}
             </CardContent>

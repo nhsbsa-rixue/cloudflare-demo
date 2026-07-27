@@ -1,10 +1,32 @@
-import { fail } from '@sveltejs/kit';
+import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { dev } from '$app/environment';
-import type { WorkerUploadResponse } from '$lib/types';
+import type { UploadResult, WorkerUploadResponse } from '$lib/types';
 
 const LOCAL_UPLOAD_URL = 'http://127.0.0.1:8787/api/upload?type=cnc';
 const MOCK_USER_ID = '1111';
+
+/**
+ * Derive a case id from the R2 object key.
+ * Keys look like `uploads/YYYY/MM/DD/{caseId}.{ext}`.
+ */
+function caseIdFromKey(key: string): string {
+  const filename = key.split('/').pop() ?? key;
+  const dotIndex = filename.lastIndexOf('.');
+  return dotIndex > 0 ? filename.slice(0, dotIndex) : filename;
+}
+
+/** Build the detail-page URL, carrying the uploaded file metadata in the query string. */
+function detailUrl(upload: UploadResult): string {
+  const params = new URLSearchParams({
+    filename: upload.filename,
+    size: String(upload.size),
+    contentType: upload.contentType,
+    uploadedAt: upload.uploadedAt,
+    key: upload.key
+  });
+  return `/design/${caseIdFromKey(upload.key)}?${params.toString()}`;
+}
 
 // This runs on the server (Cloudflare Pages edge) — never exposed to the browser.
 export const load: PageServerLoad = async () => {
@@ -49,6 +71,7 @@ export const actions: Actions = {
       });
     }
 
+    let upload: UploadResult;
     try {
       const body = new FormData();
       body.append('file', uploadedFile, uploadedFile.name);
@@ -68,16 +91,15 @@ export const actions: Actions = {
       }
 
       const payload: WorkerUploadResponse = await response.json();
-
-      return {
-        upload: payload.upload,
-        error: null
-      };
+      upload = payload.upload;
     } catch {
       return fail(503, {
         upload: null,
         error: 'Upload service currently unavailable'
       });
     }
+
+    // On success, hand off to the read-only detail page.
+    redirect(303, detailUrl(upload));
   }
 };
