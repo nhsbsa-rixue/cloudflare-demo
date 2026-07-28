@@ -76,7 +76,14 @@ export const actions: Actions = {
       const body = new FormData();
       body.append('file', uploadedFile, uploadedFile.name);
       body.append('userId', MOCK_USER_ID);
-      const requestInit = { method: 'POST', body };
+      const apiKey = platform?.env?.UPLOAD_API_KEY || 'demo-key-12345';
+      const requestInit = {
+        method: 'POST',
+        body,
+        headers: {
+          'X-API-Key': apiKey
+        }
+      };
 
       const response = dev
         ? await fetch(LOCAL_UPLOAD_URL, requestInit)

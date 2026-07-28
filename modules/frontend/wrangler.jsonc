@@ -12,7 +12,11 @@
       "binding": "WORKER",
       "service": "cloudflare-demo-worker"
     }
-  ]
+  ],
+  // Environment variables (non-secret, for development)
+  "vars": {
+    "UPLOAD_API_KEY": "demo-key-12345"
+  }
 
   // --- Cloudflare Bindings (uncomment and fill in as needed) ---
 

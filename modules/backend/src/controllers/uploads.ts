@@ -66,6 +66,12 @@ export default {
     }
 
     if (pathname === PATH_UPLOAD && method === 'POST') {
+      // Validate X-API-Key header
+      const apiKey = request.headers.get('X-API-Key');
+      if (!apiKey || apiKey !== env.UPLOAD_API_KEY) {
+        return errorJson('Unauthorized: Invalid or missing API key', 401);
+      }
+
       let formData: FormData;
       try {
         formData = await request.formData();
