@@ -1,6 +1,7 @@
 import type { Env } from '../types';
 import { R2UploadError, R2UploadService, type UploadSuccessResponse } from '../services/r2-upload';
 import { CasesService } from '../services/cases';
+import { UsersService } from '../services/users';
 import { caseIdGenerator } from '../../../utils';
 
 const CORS_HEADERS: HeadersInit = {
@@ -13,12 +14,80 @@ const DEFAULT_ALLOWED_UPLOAD_TYPES = ['cnc'];
 const PATH_UPLOAD = '/api/upload';
 const PATH_CASES = '/api/cases';
 const PATH_FILES = '/api/files';
+const PATH_AUTH_ME = '/api/auth/me';
+
+const ACCESS_EMAIL_HEADER = 'CF-Access-Authenticated-User-Email';
+const FORWARDED_EMAIL_HEADER = 'X-Authenticated-User-Email';
+const VALID_ROLES = new Set(['admin', 'user', 'operator', 'editor']);
 
 const ALL_CASE_STATUSES = ['draft', 'active', 'completed', 'archived'] as const;
 type CaseStatus = (typeof ALL_CASE_STATUSES)[number];
 
 const DEFAULT_PAGE_SIZE = 10;
 const MAX_PAGE_SIZE = 100;
+
+type AppRole = 'admin' | 'user' | 'operator' | 'editor';
+
+interface AuthenticatedActor {
+  id: string;
+  email: string;
+  name: string;
+  role: AppRole;
+}
+
+function normalizeRole(value: string | null | undefined): AppRole {
+  return value && VALID_ROLES.has(value) ? (value as AppRole) : 'user';
+}
+
+function isOperatorRole(role: AppRole): boolean {
+  return role === 'admin' || role === 'operator' || role === 'editor';
+}
+
+function defaultStatusesForRole(role: AppRole): CaseStatus[] {
+  if (isOperatorRole(role)) {
+    return ['active', 'completed', 'archived'];
+  }
+  return ['draft', 'active', 'completed'];
+}
+
+function sanitizeEmail(value: string | null): string | null {
+  const normalized = value?.trim().toLowerCase() ?? '';
+  return normalized.length > 0 ? normalized : null;
+}
+
+function readAuthenticatedEmail(request: Request): string | null {
+  return (
+    sanitizeEmail(request.headers.get(ACCESS_EMAIL_HEADER)) ??
+    sanitizeEmail(request.headers.get(FORWARDED_EMAIL_HEADER))
+  );
+}
+
+async function requireActor(request: Request, env: Env): Promise<{ actor?: AuthenticatedActor; response?: Response }> {
+  const email = readAuthenticatedEmail(request);
+  if (!email) {
+    return { response: errorJson('Authentication required', 401) };
+  }
+
+  const usersService = new UsersService(env);
+  const userResult = await usersService.getUserByEmail(email);
+  if (!userResult.ok) {
+    return { response: errorJson(userResult.error.message, 500) };
+  }
+
+  const user = userResult.value;
+  if (!user) {
+    return { response: errorJson('Forbidden: invited users only', 403) };
+  }
+
+  return {
+    actor: {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: normalizeRole(user.role)
+    }
+  };
+}
 
 function parseStatuses(raw: string | null): CaseStatus[] | undefined {
   if (!raw) {
@@ -66,6 +135,11 @@ export default {
     }
 
     if (pathname === PATH_UPLOAD && method === 'POST') {
+      const actorResult = await requireActor(request, env);
+      if (!actorResult.actor) {
+        return actorResult.response ?? errorJson('Authentication required', 401);
+      }
+
       // Validate X-API-Key header
       const apiKey = request.headers.get('X-API-Key');
       if (!apiKey || apiKey !== env.UPLOAD_API_KEY) {
@@ -82,11 +156,6 @@ export default {
       const fileData = formData.get('file') as unknown;
       if (!(fileData instanceof File)) {
         return errorJson('file is required', 400);
-      }
-
-      const userId = formData.get('userId');
-      if (typeof userId !== 'string' || !userId.trim()) {
-        return errorJson('userId is required', 400);
       }
 
       const uploadedAt = new Date().toISOString();
@@ -113,7 +182,7 @@ export default {
 
         const casePayload = {
           id: caseId,
-          userId: userId.trim(),
+          userId: actorResult.actor.id,
           status: 'draft' as const,
           imageUrl: result.key,
           type: typeParam as 'cnc' | '3d' | 'other'
@@ -138,13 +207,47 @@ export default {
       return errorJson('Method Not Allowed', 405);
     }
 
+    if (pathname === PATH_AUTH_ME && method === 'GET') {
+      const actorResult = await requireActor(request, env);
+      if (!actorResult.actor) {
+        return actorResult.response ?? errorJson('Authentication required', 401);
+      }
+
+      return Response.json(
+        {
+          user: {
+            id: actorResult.actor.id,
+            email: actorResult.actor.email,
+            name: actorResult.actor.name,
+            role: actorResult.actor.role
+          }
+        },
+        { headers: withCorsHeaders() }
+      );
+    }
+
+    if (pathname === PATH_AUTH_ME) {
+      return errorJson('Method Not Allowed', 405);
+    }
+
     // --- List cases (dashboard) ---
     if (pathname === PATH_CASES && method === 'GET') {
+      const actorResult = await requireActor(request, env);
+      if (!actorResult.actor) {
+        return actorResult.response ?? errorJson('Authentication required', 401);
+      }
+
       const page = parsePositiveInt(searchParams.get('page'), 1);
       const pageSize = Math.min(parsePositiveInt(searchParams.get('pageSize'), DEFAULT_PAGE_SIZE), MAX_PAGE_SIZE);
-      const statuses = parseStatuses(searchParams.get('statuses'));
+      const requestedStatuses = parseStatuses(searchParams.get('statuses'));
       const search = searchParams.get('search')?.trim() || undefined;
-      const userId = searchParams.get('userId')?.trim() || undefined;
+      const requestedUserId = searchParams.get('userId')?.trim() || undefined;
+
+      const defaultStatuses = defaultStatusesForRole(actorResult.actor.role);
+      const statuses = requestedStatuses
+        ? requestedStatuses.filter((status) => defaultStatuses.includes(status))
+        : defaultStatuses;
+      const userId = isOperatorRole(actorResult.actor.role) ? requestedUserId : actorResult.actor.id;
 
       const casesService = new CasesService(env);
       const result = await casesService.listCasesWithUser({
@@ -160,7 +263,7 @@ export default {
       }
 
       return Response.json(
-        { cases: result.value.cases, total: result.value.total, page, pageSize },
+        { cases: result.value.cases, total: result.value.total, page, pageSize, actorRole: actorResult.actor.role },
         { headers: withCorsHeaders() }
       );
     }
@@ -171,6 +274,11 @@ export default {
 
     // --- Download a case's stored file ---
     if (pathname === PATH_FILES && method === 'GET') {
+      const actorResult = await requireActor(request, env);
+      if (!actorResult.actor) {
+        return actorResult.response ?? errorJson('Authentication required', 401);
+      }
+
       const caseId = searchParams.get('id')?.trim();
       if (!caseId) {
         return errorJson('id is required', 400);
@@ -184,6 +292,10 @@ export default {
       const foundCase = caseResult.value;
       if (!foundCase) {
         return errorJson('Not Found', 404);
+      }
+
+      if (!isOperatorRole(actorResult.actor.role) && foundCase.userId !== actorResult.actor.id) {
+        return errorJson('Forbidden', 403);
       }
 
       const uploadService = new R2UploadService(env);

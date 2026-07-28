@@ -8,7 +8,9 @@ import type { IncomingRequestCfProperties } from '@cloudflare/workers-types';
 declare global {
   namespace App {
     // interface Error {}
-    // interface Locals {}
+    interface Locals {
+      authenticatedEmail: string | null;
+    }
     // interface PageData {}
     // interface PageState {}
 
@@ -23,6 +25,7 @@ declare global {
        */
       env: Record<string, unknown> & {
         WORKER?: Fetcher;
+        UPLOAD_API_KEY?: string;
       };
 
       /** Schedule work to outlive the response via the Cloudflare execution context. */

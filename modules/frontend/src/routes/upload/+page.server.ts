@@ -1,10 +1,10 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { dev } from '$app/environment';
+import { buildForwardedAuthHeaders } from '$lib/server/auth';
 import type { UploadResult, WorkerUploadResponse } from '$lib/types';
 
 const LOCAL_UPLOAD_URL = 'http://127.0.0.1:8787/api/upload?type=cnc';
-const MOCK_USER_ID = '1111';
 
 /**
  * Derive a case id from the R2 object key.
@@ -75,14 +75,15 @@ export const actions: Actions = {
     try {
       const body = new FormData();
       body.append('file', uploadedFile, uploadedFile.name);
-      body.append('userId', MOCK_USER_ID);
+
       const apiKey = (platform?.env?.UPLOAD_API_KEY as string) || 'demo-key-12345';
+      const headers = buildForwardedAuthHeaders(request);
+      headers.set('X-API-Key', apiKey);
+
       const requestInit: RequestInit = {
         method: 'POST',
         body,
-        headers: {
-          'X-API-Key': apiKey
-        }
+        headers
       };
 
       const response = dev

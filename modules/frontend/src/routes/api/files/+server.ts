@@ -1,6 +1,7 @@
 import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { dev } from '$app/environment';
+import { buildForwardedAuthHeaders } from '$lib/server/auth';
 
 // Worker origin used in local dev; in production the request is routed through
 // the `WORKER` service binding, where the host portion is ignored.
@@ -10,7 +11,7 @@ const WORKER_FILES_URL = 'http://127.0.0.1:8787/api/files';
  * Streams a case's stored design file from the backend worker so the browser
  * always downloads from the frontend origin (no CORS, no exposed worker URL).
  */
-export const GET: RequestHandler = async ({ url, platform, fetch }) => {
+export const GET: RequestHandler = async ({ request, url, platform, fetch }) => {
   const id = url.searchParams.get('id')?.trim();
   if (!id) {
     throw error(400, 'id is required');
@@ -24,7 +25,8 @@ export const GET: RequestHandler = async ({ url, platform, fetch }) => {
 
   let response: Response | undefined;
   try {
-    response = dev ? await fetch(target) : await platform?.env?.WORKER?.fetch(target);
+    const headers = buildForwardedAuthHeaders(request);
+    response = dev ? await fetch(target, { headers }) : await platform?.env?.WORKER?.fetch(target, { headers });
   } catch {
     throw error(503, 'File service currently unavailable');
   }

@@ -2,12 +2,23 @@
   import "../app.css";
   import { page } from "$app/state";
   import { GlobalNav, SubNav } from "$lib/components/ui/nav/index.js";
+  import type { AppUserRole, AuthenticatedUser } from "$lib/types";
 
   interface Props {
+    data: {
+      authenticatedUser: AuthenticatedUser | null;
+    };
     children: import("svelte").Snippet;
   }
 
-  let { children }: Props = $props();
+  let { data, children }: Props = $props();
+
+  const roleLabels: Record<AppUserRole, string> = {
+    admin: "Admin",
+    user: "User",
+    operator: "Operator",
+    editor: "Editor",
+  };
 
   const sectionLabel = $derived(
     page.url.pathname.startsWith("/dashboard")
@@ -23,6 +34,12 @@
   >
     Dongyu Engineering Consultancy
   </a>
+  {#if data.authenticatedUser}
+    <div class="ml-auto text-right">
+      <p class="text-xs font-semibold text-body-on-dark">{data.authenticatedUser.email}</p>
+      <p class="text-xs text-body-on-dark/70">{roleLabels[data.authenticatedUser.role]}</p>
+    </div>
+  {/if}
 </GlobalNav>
 
 <SubNav>

@@ -1,6 +1,7 @@
 export interface Env {
   UPLOADS_BUCKET: R2Bucket;
   UPLOADS_DB: D1Database;
+  UPLOAD_API_KEY: string;
 }
 
 export interface CreateCaseInput {
@@ -35,7 +36,7 @@ export interface UpdateCaseInput {
 export interface CreateUserInput {
   name: string;
   email: string;
-  role?: 'admin' | 'user' | 'editor';
+  role?: 'admin' | 'user' | 'operator' | 'editor';
 }
 
 export interface GetAllUsersOptions {
@@ -46,6 +47,6 @@ export interface GetAllUsersOptions {
 export interface UpdateUserInput {
   name?: string;
   email?: string;
-  role?: 'admin' | 'user' | 'editor';
+  role?: 'admin' | 'user' | 'operator' | 'editor';
   emailVerifiedAt?: Date | null;
 }

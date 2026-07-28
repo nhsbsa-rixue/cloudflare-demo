@@ -9,7 +9,7 @@
     CardContent,
   } from "$lib/components/ui/card/index.js";
   import { Heading, Text, Caption } from "$lib/components/ui/typography/index.js";
-  import type { CaseStatus, CaseType, UserRole } from "$lib/types";
+  import type { AppUserRole, CaseStatus, CaseType } from "$lib/types";
 
   let { data }: { data: PageData } = $props();
 
@@ -32,9 +32,11 @@
   const rangeStart = $derived(data.total === 0 ? 0 : (data.page - 1) * data.pageSize + 1);
   const rangeEnd = $derived(Math.min(data.page * data.pageSize, data.total));
 
-  const roleLabels: Record<UserRole, string> = {
-    primary: "Primary user",
+  const roleLabels: Record<AppUserRole, string> = {
+    admin: "Admin",
+    user: "User",
     operator: "Operator",
+    editor: "Editor",
   };
 
   const typeLabels: Record<CaseType, string> = {
@@ -50,18 +52,14 @@
     archived: "bg-gray-100 text-gray-700 border border-gray-300",
   };
 
-  function navigate(
-    overrides: Partial<{ role: UserRole; search: string; page: number }>,
-  ) {
+  function navigate(overrides: Partial<{ search: string; page: number }>) {
     const next = {
-      role: data.role,
       search: data.search,
       page: data.page,
       ...overrides,
     };
 
     const params = new URLSearchParams();
-    if (next.role !== "primary") params.set("role", next.role);
     if (next.search) params.set("search", next.search);
     if (next.page > 1) params.set("page", String(next.page));
 
@@ -70,11 +68,6 @@
       keepFocus: true,
       noScroll: true,
     });
-  }
-
-  function selectRole(role: UserRole) {
-    if (role === data.role) return;
-    navigate({ role, page: 1 });
   }
 
   function onSearchInput() {
@@ -147,25 +140,10 @@
       in:fly={rise(80)}
       class="mt-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
     >
-      <!-- Role toggle -->
-      <div
-        class="inline-flex w-full rounded-pill border border-hairline bg-surface-pearl p-1 md:w-auto"
-        role="group"
-        aria-label="Preview as role"
-      >
-        {#each ["primary", "operator"] as const as role (role)}
-          <button
-            type="button"
-            onclick={() => selectRole(role)}
-            aria-pressed={data.role === role}
-            class="flex-1 rounded-pill px-4 py-1.5 text-sm font-medium transition-colors md:flex-none {data.role ===
-            role
-              ? 'bg-canvas text-ink shadow-sm'
-              : 'text-ink-muted-48 hover:text-ink'}"
-          >
-            {roleLabels[role]}
-          </button>
-        {/each}
+      <div class="inline-flex w-full rounded-pill border border-hairline bg-surface-pearl px-4 py-2 md:w-auto">
+        <Caption class="text-ink-muted-48">
+          Signed in as {roleLabels[data.role]}
+        </Caption>
       </div>
 
       <!-- Search -->
@@ -243,7 +221,7 @@
             {#if data.search}
               No cases match “{data.search}”. Try a different ID.
             {:else}
-              As <span class="capitalize">{data.role}</span>, there are no cases to
+              As <span class="capitalize">{roleLabels[data.role]}</span>, there are no cases to
               show yet.
             {/if}
           </Text>

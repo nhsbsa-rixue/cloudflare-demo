@@ -16,8 +16,26 @@ export interface WorkerUploadResponse {
   upload: UploadResult;
 }
 
-/** Roles the dashboard can be previewed as (real auth wired later). */
-export type UserRole = 'primary' | 'operator';
+/** App roles persisted in the users table. */
+export type AppUserRole = 'admin' | 'user' | 'operator' | 'editor';
+
+/** Authenticated app user object returned by worker auth endpoint. */
+export interface AuthenticatedUser {
+  id: string | null;
+  email: string;
+  name: string;
+  role: AppUserRole;
+}
+
+/** Response envelope returned by the worker `GET /api/auth/me` endpoint. */
+export interface WorkerAuthMeResponse {
+  user: {
+    id: string;
+    email: string;
+    name: string;
+    role: string;
+  };
+}
 
 /** Case classification. */
 export type CaseType = 'cnc' | '3d' | 'other';
@@ -45,6 +63,7 @@ export interface WorkerCasesResponse {
   total: number;
   page: number;
   pageSize: number;
+  actorRole: AppUserRole;
 }
 
 /** Measurement unit a CNC design is dimensioned in. */
