@@ -135,7 +135,7 @@
   <div class="mx-auto w-full max-w-6xl px-6 py-12 md:py-16">
     <!-- Header -->
     <div in:fly={rise(0)} class="flex flex-col gap-1">
-      <Heading level={2}>Cases</Heading>
+      <Heading level={1}>Cases</Heading>
       <Text class="text-ink-muted-48">
         Every uploaded case in one place — filter by role, search by ID, and
         download the original design.
