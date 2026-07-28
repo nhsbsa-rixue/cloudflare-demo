@@ -76,8 +76,8 @@ export const actions: Actions = {
       const body = new FormData();
       body.append('file', uploadedFile, uploadedFile.name);
       body.append('userId', MOCK_USER_ID);
-      const apiKey = platform?.env?.UPLOAD_API_KEY || 'demo-key-12345';
-      const requestInit = {
+      const apiKey = (platform?.env?.UPLOAD_API_KEY as string) || 'demo-key-12345';
+      const requestInit: RequestInit = {
         method: 'POST',
         body,
         headers: {
