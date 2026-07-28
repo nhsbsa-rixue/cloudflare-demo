@@ -1,5 +1,6 @@
 import { sql } from 'drizzle-orm';
 import { sqliteTable, text, integer, index } from 'drizzle-orm/sqlite-core';
+import { users } from '../users/schema';
 
 /**
  * Cases table - stores case/project information
@@ -8,7 +9,9 @@ export const cases = sqliteTable(
   'cases',
   {
     id: text('id').primaryKey().notNull(),
-    userId: text('user_id').notNull(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id),
     imageUrl: text('image_url').notNull(),
     type: text('type', {
       enum: ['cnc', '3d', 'other']

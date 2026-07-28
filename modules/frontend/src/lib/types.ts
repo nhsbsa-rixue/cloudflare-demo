@@ -16,6 +16,37 @@ export interface WorkerUploadResponse {
   upload: UploadResult;
 }
 
+/** Roles the dashboard can be previewed as (real auth wired later). */
+export type UserRole = 'primary' | 'operator';
+
+/** Case classification. */
+export type CaseType = 'cnc' | '3d' | 'other';
+
+/** Lifecycle status persisted for a case in the database. */
+export type CaseStatus = 'draft' | 'active' | 'completed' | 'archived';
+
+/** A case row enriched with its owner's email/name, for the dashboard list. */
+export interface DashboardCase {
+  id: string;
+  userId: string;
+  userEmail: string | null;
+  userName: string | null;
+  imageUrl: string;
+  type: CaseType;
+  status: CaseStatus;
+  /** ISO timestamp (Date serialized over JSON). */
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Response envelope returned by the worker `GET /api/cases` endpoint. */
+export interface WorkerCasesResponse {
+  cases: DashboardCase[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
 /** Measurement unit a CNC design is dimensioned in. */
 export type DesignUnit = 'mm' | 'inch' | 'cm';
 

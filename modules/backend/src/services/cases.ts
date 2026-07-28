@@ -1,5 +1,5 @@
 import { initializeDatabaseClient } from './db-client';
-import type { CreateCaseInput, Env, GetUserCasesOptions, UpdateCaseInput } from '../types';
+import type { CreateCaseInput, Env, GetUserCasesOptions, ListCasesOptions, UpdateCaseInput } from '../types';
 
 /**
  * Cases service layer with no HTTP transport dependencies.
@@ -27,6 +27,11 @@ export class CasesService {
 
   async getUserCases(userId: string, options?: GetUserCasesOptions) {
     return this.db.cases.getCasesByUser(userId, options);
+  }
+
+  /** Paginated list of cases joined with owner email/name, for the dashboard. */
+  async listCasesWithUser(options?: ListCasesOptions) {
+    return this.db.cases.getCasesWithUser(options);
   }
 
   async updateCase(id: string, updates: UpdateCaseInput) {

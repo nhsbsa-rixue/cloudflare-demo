@@ -14,7 +14,7 @@
     {
       "binding": "UPLOADS_DB",
       "database_name": "demo-db",
-      "database_id": "cafa46dd-7670-4495-ab07-63eec486dcdb",
+      "database_id": "31bf5672-0b0b-456d-bb7d-2e3cc1a28f46",
       "migrations_dir": "../database/drizzle"
     }
   ]

@@ -13,7 +13,15 @@ export {
 export { users, type User, type NewUser, UsersHelper } from './users';
 
 // Re-export cases module
-export { cases, type Case, type NewCase, CasesHelper } from './cases';
+export {
+  cases,
+  type Case,
+  type NewCase,
+  CasesHelper,
+  type CaseStatus,
+  type CaseWithUser,
+  type GetCasesWithUserOptions
+} from './cases';
 
 // Re-export OAuth accounts module
 export {

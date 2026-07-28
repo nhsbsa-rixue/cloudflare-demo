@@ -17,6 +17,14 @@ export interface GetUserCasesOptions {
   status?: 'draft' | 'active' | 'completed' | 'archived';
 }
 
+export interface ListCasesOptions {
+  statuses?: Array<'draft' | 'active' | 'completed' | 'archived'>;
+  userId?: string;
+  search?: string;
+  limit?: number;
+  offset?: number;
+}
+
 export interface UpdateCaseInput {
   userId?: string;
   imageUrl?: string;

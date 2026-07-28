@@ -126,4 +126,16 @@ export class R2UploadService {
       uploadedAt
     };
   }
+
+  /**
+   * Fetch a previously stored object by its key.
+   * Returns `null` when the object does not exist.
+   */
+  async getObject(key: string): Promise<R2ObjectBody | null> {
+    try {
+      return await this.bucket.get(key);
+    } catch {
+      throw new R2UploadError('failed to read stored file', 503);
+    }
+  }
 }
