@@ -148,7 +148,7 @@
     <div
       role="region"
       aria-label="Single file upload drop zone"
-      class="group relative flex min-h-96 w-full flex-col items-center justify-center gap-4 rounded-md border-2 border-dashed p-6 transition-all duration-300 {dropZoneStateClass}"
+      class="group relative flex min-h-96 w-full flex-col items-center justify-center gap-4 rounded-lg border-2 border-dashed p-6 transition-all duration-300 {dropZoneStateClass}"
     >
       {#if selectedFileName}
         <button

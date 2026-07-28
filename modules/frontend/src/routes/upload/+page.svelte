@@ -66,12 +66,16 @@
       <div class="flex-1 flex items-center justify-center">
         <div class="w-full max-w-[1440px] mx-auto lg:grid lg:grid-cols-3">
           <div class="w-full max-w-104 mx-auto lg:col-start-3 lg:justify-self-center flex flex-col gap-6">
-            <Heading
-              level={1}
-              class="w-full text-center font-display text-body-on-dark tracking-[-0.02em] text-[2rem]! sm:text-[2.5rem]!"
+            <div
+              class="mx-auto flex w-full max-w-3xl flex-col items-center rounded-lg border border-white/10 bg-surface-tile-1/72 px-6 py-5 text-center backdrop-blur-md"
             >
-              CNC design upload
-            </Heading>
+              <Heading
+                level={1}
+                class="w-full text-center font-display text-body-on-dark tracking-[-0.02em] [text-wrap:balance] text-[2rem]! sm:text-[2.5rem]!"
+              >
+                CNC design upload
+              </Heading>
+            </div>
 
             <Card
               variant="utility"

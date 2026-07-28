@@ -79,7 +79,7 @@
       <span
         class={active
           ? "inline-flex items-center gap-1.5 rounded-pill border border-primary bg-surface-pearl px-3 py-1.5 text-sm font-semibold text-ink"
-          : "inline-flex items-center rounded-pill border border-hairline bg-surface-pearl px-3 py-1.5 text-sm text-ink-muted-48 opacity-60"}
+          : "inline-flex items-center rounded-pill border border-hairline bg-surface-pearl px-3 py-1.5 text-sm text-ink-muted-80"}
       >
         {#if active}
           <svg

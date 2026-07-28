@@ -47,7 +47,7 @@
     draft: "bg-surface-pearl text-ink-muted-80 border border-hairline",
     active: "bg-blue-50 text-blue-700 border border-blue-100",
     completed: "bg-green-50 text-green-700 border border-green-100",
-    archived: "bg-gray-100 text-gray-500 border border-gray-200",
+    archived: "bg-gray-100 text-gray-700 border border-gray-300",
   };
 
   function navigate(
