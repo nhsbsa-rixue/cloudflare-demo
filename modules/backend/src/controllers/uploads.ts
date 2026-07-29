@@ -1,6 +1,7 @@
 import type { Env } from '../types';
 import { R2UploadError, R2UploadService, type UploadSuccessResponse } from '../services/r2-upload';
 import { CasesService } from '../services/cases';
+import { resolveNewUserActor, type AppRole, type AuthenticatedActor } from '../services/auth';
 import { UsersService } from '../services/users';
 import { caseIdGenerator } from '../../../utils';
 
@@ -25,15 +26,6 @@ type CaseStatus = (typeof ALL_CASE_STATUSES)[number];
 
 const DEFAULT_PAGE_SIZE = 10;
 const MAX_PAGE_SIZE = 100;
-
-type AppRole = 'admin' | 'user' | 'operator' | 'editor';
-
-interface AuthenticatedActor {
-  id: string;
-  email: string;
-  name: string;
-  role: AppRole;
-}
 
 function normalizeRole(value: string | null | undefined): AppRole {
   return value && VALID_ROLES.has(value) ? (value as AppRole) : 'user';
@@ -76,7 +68,14 @@ async function requireActor(request: Request, env: Env): Promise<{ actor?: Authe
 
   const user = userResult.value;
   if (!user) {
-    return { response: errorJson('Forbidden: invited users only', 403) };
+    const createOrRetry = await resolveNewUserActor(usersService, email);
+    if (!createOrRetry.actor) {
+      return { response: errorJson(createOrRetry.errorMessage ?? 'failed to create user', 500) };
+    }
+
+    return {
+      actor: createOrRetry.actor
+    };
   }
 
   return {
