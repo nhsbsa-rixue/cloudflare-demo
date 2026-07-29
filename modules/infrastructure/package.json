@@ -1,0 +1,16 @@
+{
+  "name": "@cloudflare-demo/infrastructure",
+  "version": "1.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "bootstrap:api-key": "node --experimental-strip-types ./src/scripts/bootstrap-api-key.ts",
+    "check": "tsc --noEmit",
+    "lint": "biome check .",
+    "format": "biome format --write ."
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.1",
+    "typescript": "^5.0.0"
+  }
+}

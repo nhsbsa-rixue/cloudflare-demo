@@ -1,7 +1,8 @@
 export interface Env {
   UPLOADS_BUCKET: R2Bucket;
   UPLOADS_DB: D1Database;
-  UPLOAD_API_KEY: string;
+  'x-api-key'?: string;
+  UPLOAD_API_KEY?: string;
 }
 
 export interface CreateCaseInput {

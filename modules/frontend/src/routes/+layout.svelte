@@ -37,7 +37,6 @@
   {#if data.authenticatedUser}
     <div class="ml-auto text-right">
       <p class="text-xs font-semibold text-body-on-dark">{data.authenticatedUser.email}</p>
-      <p class="text-xs text-body-on-dark/70">{roleLabels[data.authenticatedUser.role]}</p>
     </div>
   {/if}
 </GlobalNav>

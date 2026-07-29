@@ -171,6 +171,15 @@ importers:
         specifier: ^4.0.0
         version: 4.112.0(@cloudflare/workers-types@4.20260702.1)(@types/node@26.1.1)
 
+  modules/infrastructure:
+    devDependencies:
+      '@types/node':
+        specifier: ^26.1.1
+        version: 26.1.1
+      typescript:
+        specifier: ^5.0.0
+        version: 5.9.3
+
 packages:
 
   '@adobe/css-tools@4.5.0':

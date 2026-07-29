@@ -25,6 +25,7 @@ declare global {
        */
       env: Record<string, unknown> & {
         WORKER?: Fetcher;
+        'x-api-key'?: string;
         UPLOAD_API_KEY?: string;
       };
 

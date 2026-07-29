@@ -9,7 +9,7 @@
     CardContent,
     CardHeader,
   } from "$lib/components/ui/card/index.js";
-  import { Heading, Text } from "$lib/components/ui/typography/index.js";
+  import { Text } from "$lib/components/ui/typography/index.js";
 
   let { data, form }: { data: PageData; form: ActionData } = $props();
   const title = "CNC Demo Upload";
@@ -65,27 +65,14 @@
       <div class="flex-1 flex items-center justify-center">
         <div class="w-full max-w-[1440px] mx-auto lg:grid lg:grid-cols-3">
           <div class="w-full max-w-104 mx-auto lg:col-start-3 lg:justify-self-center flex flex-col gap-6">
-            <div
-              class="mx-auto flex w-full max-w-3xl flex-col items-center rounded-lg border border-white/10 bg-surface-tile-1/72 px-6 py-5 text-center backdrop-blur-md"
-            >
-              <Heading
-                level={1}
-                class="w-full text-center font-display text-body-on-dark tracking-[-0.02em] [text-wrap:balance] text-[2rem]! sm:text-[2.5rem]!"
-              >
-                CNC design upload
-              </Heading>
-            </div>
-
             <Card
               variant="utility"
               class="w-full min-h-164 mb-(--spacing-xxl) text-left transition-all duration-500 flex flex-col"
             >
             <CardHeader>
               <div class="flex items-center justify-between gap-3">
-                <Text
-                  class="text-sm font-semibold uppercase tracking-wider text-ink-muted-48"
-                >
-                  Single File Upload
+                <Text class="text-sm font-semibold uppercase tracking-wider text-ink-muted-48">
+                  CNC design upload
                 </Text>
                 <Badge variant="pearl" selected={hasSelectedFile}>
                   {#if hasSelectedFile}

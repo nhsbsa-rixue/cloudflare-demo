@@ -76,7 +76,8 @@ export const actions: Actions = {
       const body = new FormData();
       body.append('file', uploadedFile, uploadedFile.name);
 
-      const apiKey = (platform?.env?.UPLOAD_API_KEY as string) || 'demo-key-12345';
+      const apiKey =
+        (platform?.env?.['x-api-key'] as string) || (platform?.env?.UPLOAD_API_KEY as string) || 'demo-key-12345';
       const headers = buildForwardedAuthHeaders(request);
       headers.set('X-API-Key', apiKey);
 

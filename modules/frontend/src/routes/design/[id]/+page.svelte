@@ -2,7 +2,6 @@
   import { fly } from "svelte/transition";
   import { cubicOut } from "svelte/easing";
   import type { PageData } from "./$types";
-  import { Button } from "$lib/components/ui/button/index.js";
   import { Badge } from "$lib/components/ui/badge/index.js";
   import {
     Card,
@@ -125,7 +124,6 @@
       </div>
       <div class="flex items-center gap-3">
         <Badge variant="pearl">{statusLabels[detail.status] ?? detail.status}</Badge>
-        <Button variant="secondary" size="md" href="/upload">Upload another</Button>
       </div>
     </div>
 

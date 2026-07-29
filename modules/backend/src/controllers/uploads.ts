@@ -37,7 +37,7 @@ function isOperatorRole(role: AppRole): boolean {
 
 function defaultStatusesForRole(role: AppRole): CaseStatus[] {
   if (isOperatorRole(role)) {
-    return ['active', 'completed', 'archived'];
+    return [...ALL_CASE_STATUSES];
   }
   return ['draft', 'active', 'completed'];
 }
@@ -141,7 +141,8 @@ export default {
 
       // Validate X-API-Key header
       const apiKey = request.headers.get('X-API-Key');
-      if (!apiKey || apiKey !== env.UPLOAD_API_KEY) {
+      const envApiKey = env['x-api-key'] || env.UPLOAD_API_KEY || 'demo-key-12345';
+      if (!apiKey || apiKey !== envApiKey) {
         return errorJson('Unauthorized: Invalid or missing API key', 401);
       }
 

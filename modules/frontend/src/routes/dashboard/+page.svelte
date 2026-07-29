@@ -3,6 +3,7 @@
   import { goto } from "$app/navigation";
   import { fly } from "svelte/transition";
   import { cubicOut } from "svelte/easing";
+  import PlusIcon from "@lucide/svelte/icons/plus";
   import { Button } from "$lib/components/ui/button/index.js";
   import {
     Card,
@@ -146,41 +147,24 @@
         </Caption>
       </div>
 
-      <!-- Search -->
-      <div class="relative w-full md:w-80">
-        <span
-          class="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-ink-muted-48"
-          aria-hidden="true"
+      <div class="flex w-full flex-col gap-3 md:w-auto md:flex-row md:items-center">
+        <Button
+          variant="dark"
+          size="md"
+          href="/upload"
+          class="inline-flex items-center justify-center gap-2 whitespace-nowrap"
+          style="color: rgb(var(--color-body-on-dark));"
+          aria-label="Create a new case"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <circle cx="11" cy="11" r="8" />
-            <path d="m21 21-4.3-4.3" />
-          </svg>
-        </span>
-        <input
-          type="search"
-          bind:value={searchValue}
-          oninput={onSearchInput}
-          placeholder="Search by case ID"
-          aria-label="Search by case ID"
-          class="w-full rounded-pill border border-hairline bg-canvas py-2.5 pl-11 pr-10 text-body placeholder-ink-muted-48 transition-colors focus-visible:border-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-        />
-        {#if searchValue}
-          <button
-            type="button"
-            onclick={clearSearch}
-            aria-label="Clear search"
-            class="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-ink-muted-48 transition-colors hover:text-ink"
+          <PlusIcon class="size-4 text-body-on-dark" aria-hidden="true" />
+          <span class="text-body-on-dark">New case</span>
+        </Button>
+
+        <!-- Search -->
+        <div class="relative w-full md:w-80">
+          <span
+            class="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-ink-muted-48"
+            aria-hidden="true"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -193,11 +177,42 @@
               stroke-linecap="round"
               stroke-linejoin="round"
             >
-              <path d="M18 6 6 18" />
-              <path d="m6 6 12 12" />
+              <circle cx="11" cy="11" r="8" />
+              <path d="m21 21-4.3-4.3" />
             </svg>
-          </button>
-        {/if}
+          </span>
+          <input
+            type="search"
+            bind:value={searchValue}
+            oninput={onSearchInput}
+            placeholder="Search by case ID"
+            aria-label="Search by case ID"
+            class="w-full rounded-pill border border-hairline bg-canvas py-2.5 pl-11 pr-10 text-body placeholder-ink-muted-48 transition-colors focus-visible:border-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+          />
+          {#if searchValue}
+            <button
+              type="button"
+              onclick={clearSearch}
+              aria-label="Clear search"
+              class="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-ink-muted-48 transition-colors hover:text-ink"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M18 6 6 18" />
+                <path d="m6 6 12 12" />
+              </svg>
+            </button>
+          {/if}
+        </div>
       </div>
     </div>
 
@@ -216,7 +231,7 @@
     <div in:fly={rise(160)} class="mt-6">
       {#if data.cases.length === 0 && !data.error}
         <Card variant="utility" class="py-16 text-center">
-          <Heading level={5} class="text-ink">No cases found</Heading>
+          <Heading level={2} class="text-2xl leading-tight tracking-tight text-ink">No cases found</Heading>
           <Text class="mt-2 text-ink-muted-48">
             {#if data.search}
               No cases match “{data.search}”. Try a different ID.
