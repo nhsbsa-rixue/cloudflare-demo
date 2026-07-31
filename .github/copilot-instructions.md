@@ -41,3 +41,14 @@
 - Ask concise clarifying questions when requirements are ambiguous.
 - Ask concise clarifying questions before making high-impact decisions with multiple valid approaches.
 - Do not ask unnecessary questions when intent is already clear and the change is low risk.
+
+## Frontend Button Colour Trap
+- `app.css` sets `a { color: rgb(var(--color-primary)) }` globally.
+- This overrides Tailwind `text-white` on any `<Button>` that renders as an `<a>` (i.e. when `href` is passed).
+- The `label` prop does NOT fix this — the text node inherits the link colour.
+- Always add `style="color: rgb(var(--color-body-on-dark));"` to every `<Button variant="dark" href="...">` AND use a children snippet with `<span class="text-body-on-dark">` to ensure white text:
+  ```svelte
+  <Button variant="dark" size="pill" href="/somewhere" style="color: rgb(var(--color-body-on-dark));">
+    <span class="text-body-on-dark">Button label</span>
+  </Button>
+  ```

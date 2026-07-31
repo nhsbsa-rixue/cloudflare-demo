@@ -132,16 +132,4 @@
       </div>
     </div>
   </section>
-
-  <footer
-    class="w-full py-10 px-6 text-center"
-    style="background-color: #12171d; color: #d0d5db;"
-  >
-    <p class="text-2xl font-semibold" style="color: #ffffff;">
-      Dongyu Engineering Consultancy
-    </p>
-    <p class="mt-6 text-sm">
-      © 2026 Dongyu Engineering Consultancy. All rights reserved
-    </p>
-  </footer>
 </main>
