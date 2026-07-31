@@ -10,6 +10,17 @@ export { Card, CardContent, CardFooter, CardHeader } from './card/index.js';
 // Badge
 export { Badge } from './badge/index.js';
 
+// Select
+export {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  SelectGroup,
+  SelectLabel
+} from './select/index.js';
+
 // Navigation
 export { GlobalNav, SubNav } from './nav/index.js';
 

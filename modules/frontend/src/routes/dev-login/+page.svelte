@@ -4,6 +4,16 @@
   import { Card } from "$lib/components/ui/card/index.js";
   import { Heading, Text, Caption } from "$lib/components/ui/typography/index.js";
   import { Button } from "$lib/components/ui/button/index.js";
+  import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+  } from "$lib/components/ui/select/index.js";
+  import UserIcon from "@lucide/svelte/icons/user";
+  import ArrowLeftRightIcon from "@lucide/svelte/icons/arrow-left-right";
+  import LogOutIcon from "@lucide/svelte/icons/log-out";
   import type { PageData } from "./$types";
 
   interface Props {
@@ -11,6 +21,12 @@
   }
 
   let { data }: Props = $props();
+
+  let selectedEmail = $state(data.currentEmail ?? data.knownUsers[0]?.email ?? "");
+
+  $effect(() => {
+    selectedEmail = data.currentEmail ?? data.knownUsers[0]?.email ?? "";
+  });
 
   const rise = (delay: number) => ({ y: 16, duration: 600, delay, easing: cubicOut });
 </script>
@@ -40,23 +56,45 @@
       </div>
 
       <div in:fly={rise(160)} class="mt-2 flex flex-col gap-3 w-full max-w-xs">
-        {#each data.knownUsers as user (user.email)}
-          <form method="POST" action="?/switchUser" class="w-full">
-            <input type="hidden" name="email" value={user.email} />
-            <Button
-              type="submit"
-              variant={data.currentEmail === user.email ? "dark" : "secondary"}
-              size="pill"
-              class="w-full"
-            >
-              {user.label}
-            </Button>
-          </form>
-        {/each}
+        <form method="POST" action="?/switchUser" class="flex w-full flex-col gap-3">
+          <input type="hidden" name="email" value={selectedEmail} />
+          <Select
+            type="single"
+            bind:value={selectedEmail}
+            items={data.knownUsers.map((user) => ({ value: user.email, label: user.label }))}
+          >
+            <SelectTrigger class="w-full">
+              <span class="flex min-w-0 items-center gap-2">
+                <UserIcon class="size-4 shrink-0 text-ink-muted-48" aria-hidden="true" />
+                <SelectValue placeholder="Choose a mock user" class="truncate" />
+              </span>
+            </SelectTrigger>
+            <SelectContent>
+              {#each data.knownUsers as user (user.email)}
+                <SelectItem value={user.email} label={user.label} />
+              {/each}
+            </SelectContent>
+          </Select>
+          <Button
+            type="submit"
+            variant="dark"
+            size="pill"
+            class="w-full inline-flex items-center justify-center gap-2 whitespace-nowrap"
+          >
+            <ArrowLeftRightIcon class="size-4 shrink-0" aria-hidden="true" />
+            Switch user
+          </Button>
+        </form>
 
         {#if data.currentEmail}
           <form method="POST" action="?/logout" class="w-full">
-            <Button type="submit" variant="ghost" size="pill" class="w-full">
+            <Button
+              type="submit"
+              variant="ghost"
+              size="pill"
+              class="w-full inline-flex items-center justify-center gap-2 whitespace-nowrap"
+            >
+              <LogOutIcon class="size-4 shrink-0" aria-hidden="true" />
               Sign out
             </Button>
           </form>

@@ -11,3 +11,14 @@ VALUES (
 	(cast((julianday('now') - 2440587.5)*86400000 as integer))
 )
 ON CONFLICT(`id`) DO NOTHING;
+
+INSERT INTO `users` (`id`, `name`, `email`, `role`, `created_at`, `updated_at`)
+VALUES (
+	'1112',
+	'Demo Operator',
+	'operator@dongyu.com',
+	'operator',
+	(cast((julianday('now') - 2440587.5)*86400000 as integer)),
+	(cast((julianday('now') - 2440587.5)*86400000 as integer))
+)
+ON CONFLICT(`id`) DO NOTHING;
