@@ -1,11 +1,15 @@
 import { dev } from '$app/environment';
+import { redirect } from '@sveltejs/kit';
 import type { LayoutServerLoad } from './$types';
 import { buildForwardedAuthHeaders, displayNameFromEmail } from '$lib/server/auth';
 import type { AppUserRole, WorkerAuthMeResponse } from '$lib/types';
 
 const WORKER_AUTH_ME_URL = 'http://127.0.0.1:8787/api/auth/me';
 
-const VALID_ROLES: ReadonlySet<string> = new Set(['admin', 'user', 'operator', 'editor']);
+// Pages that do not require a whitelisted D1 account.
+const PUBLIC_PATHS = new Set(['/', '/about', '/access-denied']);
+
+const VALID_ROLES: ReadonlySet<string> = new Set(['admin', 'user', 'operator', 'editor', 'guest']);
 
 function normalizeRole(value: string | null | undefined): AppUserRole {
   if (value && VALID_ROLES.has(value)) {
@@ -14,7 +18,7 @@ function normalizeRole(value: string | null | undefined): AppUserRole {
   return 'user';
 }
 
-export const load: LayoutServerLoad = async ({ request, platform, fetch, locals }) => {
+export const load: LayoutServerLoad = async ({ request, platform, fetch, locals, url }) => {
   const email = locals.authenticatedEmail;
 
   if (!email) {
@@ -41,6 +45,9 @@ export const load: LayoutServerLoad = async ({ request, platform, fetch, locals 
       : await platform?.env?.WORKER?.fetch(WORKER_AUTH_ME_URL, { headers });
 
     if (!response || !response.ok) {
+      if (response?.status === 403 && !PUBLIC_PATHS.has(url.pathname)) {
+        redirect(303, '/access-denied');
+      }
       return {
         authenticatedUser: {
           id: null,

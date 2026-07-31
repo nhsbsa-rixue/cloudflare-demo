@@ -18,6 +18,7 @@
     user: "User",
     operator: "Operator",
     editor: "Editor",
+    guest: "Guest",
   };
 
   const sectionLabel = $derived(

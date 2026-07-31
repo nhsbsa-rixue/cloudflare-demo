@@ -42,7 +42,6 @@ require_var ACCESS_APP_NAME
 require_var CF_API_TOKEN
 require_var CF_ACCOUNT_ID
 require_var ACCESS_APP_DOMAIN
-require_var ACCESS_ALLOW_EMAILS
 
 ACCESS_APP_NAME="${ACCESS_APP_NAME:-cloudflare-demo-web-access}"
 ACCESS_POLICY_NAME="${ACCESS_POLICY_NAME:-allow-invited-users}"
@@ -146,22 +145,13 @@ process.stdout.write(policy?.id || '');
   fi
 fi
 
+# Allow any OTP-verified email through Access; the D1 users table is the sole whitelist.
 POLICY_BODY="$(node -e "
-const emails = String(process.env.ACCESS_ALLOW_EMAILS || '')
-  .split(',')
-  .map((v) => v.trim())
-  .filter(Boolean);
-
-if (emails.length === 0) {
-  throw new Error('ACCESS_ALLOW_EMAILS produced an empty email list.');
-}
-
-const include = emails.map((email) => ({ email: { email } }));
 const payload = {
   name: process.env.ACCESS_POLICY_NAME,
   decision: 'allow',
   precedence: 1,
-  include,
+  include: [{ everyone: {} }],
   exclude: [],
   require: []
 };
@@ -181,4 +171,4 @@ echo "Done"
 echo "App ID: ${APP_ID}"
 echo "Domain: ${ACCESS_APP_DOMAIN}"
 echo "Policy: ${ACCESS_POLICY_NAME}"
-echo "Allowed emails: ${ACCESS_ALLOW_EMAILS}"
+echo "Policy: allow everyone (D1 whitelist enforced at app layer)"

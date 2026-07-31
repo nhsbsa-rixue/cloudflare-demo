@@ -17,7 +17,7 @@ export interface WorkerUploadResponse {
 }
 
 /** App roles persisted in the users table. */
-export type AppUserRole = 'admin' | 'user' | 'operator' | 'editor';
+export type AppUserRole = 'admin' | 'user' | 'operator' | 'editor' | 'guest';
 
 /** Authenticated app user object returned by worker auth endpoint. */
 export interface AuthenticatedUser {

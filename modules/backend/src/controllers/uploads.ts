@@ -1,7 +1,7 @@
 import type { Env } from '../types';
 import { R2UploadError, R2UploadService, type UploadSuccessResponse } from '../services/r2-upload';
 import { CasesService } from '../services/cases';
-import { resolveNewUserActor, type AppRole, type AuthenticatedActor } from '../services/auth';
+import { normalizeRole, type AppRole, type AuthenticatedActor } from '../services/auth';
 import { UsersService } from '../services/users';
 import { caseIdGenerator } from '../../../utils';
 
@@ -19,17 +19,13 @@ const PATH_AUTH_ME = '/api/auth/me';
 
 const ACCESS_EMAIL_HEADER = 'CF-Access-Authenticated-User-Email';
 const FORWARDED_EMAIL_HEADER = 'X-Authenticated-User-Email';
-const VALID_ROLES = new Set(['admin', 'user', 'operator', 'editor']);
+const VALID_ROLES = new Set(['admin', 'user', 'operator', 'editor', 'guest']);
 
 const ALL_CASE_STATUSES = ['draft', 'active', 'completed', 'archived'] as const;
 type CaseStatus = (typeof ALL_CASE_STATUSES)[number];
 
 const DEFAULT_PAGE_SIZE = 10;
 const MAX_PAGE_SIZE = 100;
-
-function normalizeRole(value: string | null | undefined): AppRole {
-  return value && VALID_ROLES.has(value) ? (value as AppRole) : 'user';
-}
 
 function isOperatorRole(role: AppRole): boolean {
   return role === 'admin' || role === 'operator' || role === 'editor';
@@ -68,14 +64,7 @@ async function requireActor(request: Request, env: Env): Promise<{ actor?: Authe
 
   const user = userResult.value;
   if (!user) {
-    const createOrRetry = await resolveNewUserActor(usersService, email);
-    if (!createOrRetry.actor) {
-      return { response: errorJson(createOrRetry.errorMessage ?? 'failed to create user', 500) };
-    }
-
-    return {
-      actor: createOrRetry.actor
-    };
+    return { response: errorJson('Access denied: your email is not authorized', 403) };
   }
 
   return {
@@ -137,6 +126,9 @@ export default {
       const actorResult = await requireActor(request, env);
       if (!actorResult.actor) {
         return actorResult.response ?? errorJson('Authentication required', 401);
+      }
+      if (actorResult.actor.role === 'guest') {
+        return errorJson('Forbidden', 403);
       }
 
       // Validate X-API-Key header

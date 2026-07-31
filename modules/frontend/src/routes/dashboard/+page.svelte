@@ -38,6 +38,7 @@
     user: "User",
     operator: "Operator",
     editor: "Editor",
+    guest: "Guest",
   };
 
   const typeLabels: Record<CaseType, string> = {
