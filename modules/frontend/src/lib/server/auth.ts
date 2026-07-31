@@ -1,4 +1,5 @@
 import { dev } from '$app/environment';
+import { DEV_MOCK_USER_COOKIE, DEV_SIGNED_OUT_SENTINEL } from './dev-auth';
 
 const ACCESS_EMAIL_HEADER = 'CF-Access-Authenticated-User-Email';
 const FORWARDED_EMAIL_HEADER = 'X-Authenticated-User-Email';
@@ -7,6 +8,26 @@ const DEV_FALLBACK_EMAIL = 'demo@dongyu.com';
 function normalizeEmail(value: string | null): string | null {
   const email = value?.trim().toLowerCase();
   return email && email.length > 0 ? email : null;
+}
+
+function readCookieValue(request: Request, name: string): string | null {
+  const cookieHeader = request.headers.get('cookie');
+  if (!cookieHeader) {
+    return null;
+  }
+
+  for (const part of cookieHeader.split(';')) {
+    const separatorIndex = part.indexOf('=');
+    if (separatorIndex === -1) {
+      continue;
+    }
+    const key = part.slice(0, separatorIndex).trim();
+    if (key === name) {
+      return decodeURIComponent(part.slice(separatorIndex + 1).trim());
+    }
+  }
+
+  return null;
 }
 
 export function getAuthenticatedEmailFromRequest(request: Request): string | null {
@@ -21,6 +42,14 @@ export function getAuthenticatedEmailFromRequest(request: Request): string | nul
   }
 
   if (dev) {
+    const mockCookie = readCookieValue(request, DEV_MOCK_USER_COOKIE);
+    if (mockCookie === DEV_SIGNED_OUT_SENTINEL) {
+      return null;
+    }
+    const mockEmail = normalizeEmail(mockCookie);
+    if (mockEmail) {
+      return mockEmail;
+    }
     return DEV_FALLBACK_EMAIL;
   }
 

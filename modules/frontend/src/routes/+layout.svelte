@@ -1,6 +1,7 @@
 <script lang="ts">
   import "../app.css";
   import { page } from "$app/state";
+  import { dev } from "$app/environment";
   import { GlobalNav, SubNav } from "$lib/components/ui/nav/index.js";
   import type { AppUserRole, AuthenticatedUser } from "$lib/types";
 
@@ -40,7 +41,7 @@
       <p class="max-[680px]:hidden text-xs font-semibold text-body-on-dark">{data.authenticatedUser.email}</p>
       <span class="max-[680px]:hidden text-body-on-dark opacity-30 select-none">·</span>
       <a
-        href="/cdn-cgi/access/logout"
+        href={dev ? "/dev-login" : "/cdn-cgi/access/logout"}
         class="text-xs text-body-on-dark opacity-60 hover:opacity-100 transition-opacity duration-150"
       >
         Sign out
