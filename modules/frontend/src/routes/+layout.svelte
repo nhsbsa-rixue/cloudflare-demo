@@ -36,8 +36,15 @@
     Dongyu Engineering Consultancy
   </a>
   {#if data.authenticatedUser}
-    <div class="ml-auto text-right">
+    <div class="ml-auto flex items-center gap-3">
       <p class="text-xs font-semibold text-body-on-dark">{data.authenticatedUser.email}</p>
+      <span class="text-body-on-dark opacity-30 select-none">·</span>
+      <a
+        href="/cdn-cgi/access/logout"
+        class="text-xs text-body-on-dark opacity-60 hover:opacity-100 transition-opacity duration-150"
+      >
+        Sign out
+      </a>
     </div>
   {/if}
 </GlobalNav>

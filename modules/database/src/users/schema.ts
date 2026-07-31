@@ -10,7 +10,7 @@ export const users = sqliteTable(
     id: text('id').primaryKey().notNull(),
     name: text('name').notNull(),
     email: text('email').notNull().unique(),
-    role: text('role').notNull().default('user'), // 'admin', 'user', 'editor'
+    role: text('role').notNull().default('user'), // 'admin', 'user', 'operator', 'guest'
     emailVerifiedAt: integer('email_verified_at', { mode: 'timestamp_ms' }),
     createdAt: integer('created_at', { mode: 'timestamp_ms' })
       .notNull()
