@@ -39,10 +39,9 @@
   {#if data.authenticatedUser}
     <div class="ml-auto flex shrink-0 items-center gap-3">
       <p class="max-[680px]:hidden text-xs font-semibold text-body-on-dark">{data.authenticatedUser.email}</p>
-      <span class="max-[680px]:hidden text-body-on-dark opacity-30 select-none">·</span>
       <a
         href={dev ? "/dev-login" : "/cdn-cgi/access/logout"}
-        class="text-xs text-body-on-dark opacity-60 hover:opacity-100 transition-opacity duration-150"
+        class="text-xs font-medium text-body-on-dark hover:text-primary-on-dark transition-colors duration-150"
       >
         Sign out
       </a>

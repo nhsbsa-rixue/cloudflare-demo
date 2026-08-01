@@ -21,6 +21,9 @@ export {
   SelectLabel
 } from './select/index.js';
 
+// Native Select
+export { NativeSelect } from './native-select/index.js';
+
 // Navigation
 export { GlobalNav, SubNav } from './nav/index.js';
 

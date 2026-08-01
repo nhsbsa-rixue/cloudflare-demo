@@ -4,16 +4,7 @@
   import { Card } from "$lib/components/ui/card/index.js";
   import { Heading, Text, Caption } from "$lib/components/ui/typography/index.js";
   import { Button } from "$lib/components/ui/button/index.js";
-  import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-  } from "$lib/components/ui/select/index.js";
-  import UserIcon from "@lucide/svelte/icons/user";
-  import ArrowLeftRightIcon from "@lucide/svelte/icons/arrow-left-right";
-  import LogOutIcon from "@lucide/svelte/icons/log-out";
+  import { NativeSelect } from "$lib/components/ui/native-select/index.js";
   import type { PageData } from "./$types";
 
   interface Props {
@@ -21,6 +12,8 @@
   }
 
   let { data }: Props = $props();
+
+  const emailSelectId = "dev-login-email";
 
   let selectedEmail = $state(data.currentEmail ?? data.knownUsers[0]?.email ?? "");
 
@@ -40,12 +33,12 @@
   <div class="w-full max-w-3xl">
     <Card variant="utility" class="w-full px-12 py-16 flex flex-col items-center text-center gap-6">
       <div in:fly={rise(0)}>
-        <Caption class="text-ink-muted-48 uppercase tracking-wider mb-3">Local development only</Caption>
+        <Caption class="text-ink-muted-80 uppercase tracking-wider mb-3">Local development only</Caption>
         <Heading level={1}>{data.currentEmail ? "Dev sign-in" : "Signed Out"}</Heading>
       </div>
 
       <div in:fly={rise(80)}>
-        <Text size="lg" class="text-ink-muted-48">
+        <Text size="lg" class="text-ink-muted-80">
           {#if data.currentEmail}
             Signed in locally as <strong>{data.currentEmail}</strong>. This mock identity replaces
             Cloudflare Access, which isn't available when running the dev server.
@@ -55,34 +48,27 @@
         </Text>
       </div>
 
-      <div in:fly={rise(160)} class="mt-2 flex flex-col gap-3 w-full max-w-xs">
-        <form method="POST" action="?/switchUser" class="flex w-full flex-col gap-3">
-          <input type="hidden" name="email" value={selectedEmail} />
-          <Select
-            type="single"
+      <div in:fly={rise(160)} class="w-full flex flex-col gap-3">
+        <form method="POST" action="?/switchUser" class="flex w-full flex-col gap-2">
+          <label for={emailSelectId} class="sr-only">Choose a mock user</label>
+          <NativeSelect
             bind:value={selectedEmail}
-            items={data.knownUsers.map((user) => ({ value: user.email, label: user.label }))}
+            id={emailSelectId}
+            name="email"
+            class="w-full"
           >
-            <SelectTrigger class="w-full">
-              <span class="flex min-w-0 items-center gap-2">
-                <UserIcon class="size-4 shrink-0 text-ink-muted-48" aria-hidden="true" />
-                <SelectValue placeholder="Choose a mock user" class="truncate" />
-              </span>
-            </SelectTrigger>
-            <SelectContent>
-              {#each data.knownUsers as user (user.email)}
-                <SelectItem value={user.email} label={user.label} />
-              {/each}
-            </SelectContent>
-          </Select>
+            {#each data.knownUsers as user (user.email)}
+              <option value={user.email}>{user.label}</option>
+            {/each}
+          </NativeSelect>
           <Button
             type="submit"
             variant="dark"
             size="pill"
-            class="w-full inline-flex items-center justify-center gap-2 whitespace-nowrap"
+            class="w-full"
+            style="color: rgb(var(--color-body-on-dark));"
           >
-            <ArrowLeftRightIcon class="size-4 shrink-0" aria-hidden="true" />
-            Switch user
+            <span class="text-body-on-dark">Switch user</span>
           </Button>
         </form>
 
@@ -90,12 +76,12 @@
           <form method="POST" action="?/logout" class="w-full">
             <Button
               type="submit"
-              variant="ghost"
+              variant="dark"
               size="pill"
-              class="w-full inline-flex items-center justify-center gap-2 whitespace-nowrap"
+              class="w-full"
+              style="color: rgb(var(--color-body-on-dark));"
             >
-              <LogOutIcon class="size-4 shrink-0" aria-hidden="true" />
-              Sign out
+              <span class="text-body-on-dark">Sign out</span>
             </Button>
           </form>
         {/if}
