@@ -23,9 +23,23 @@
   };
 
   const sectionLabel = $derived(
-    page.url.pathname.startsWith("/dashboard")
-      ? "Dashboard"
-      : "CNC design upload",
+    page.error
+      ? page.status === 404
+        ? "Not found"
+        : "Error"
+      : page.url.pathname.startsWith("/dashboard")
+        ? "Dashboard"
+        : page.url.pathname.startsWith("/upload")
+          ? "Upload"
+          : page.url.pathname.startsWith("/design")
+            ? "Design"
+            : page.url.pathname.startsWith("/dev-login")
+              ? "Dev login"
+              : page.url.pathname.startsWith("/about")
+                ? "About"
+                : page.url.pathname.startsWith("/access-denied")
+                  ? "Access denied"
+                  : "Home",
   );
 </script>
 
