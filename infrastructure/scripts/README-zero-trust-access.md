@@ -31,6 +31,8 @@ Additional required value for setup script
 Optional setup values
 - APP_ID (optional existing Access app id)
 - ACCESS_APP_NAME (default: cloudflare-demo-web-access)
+- ACCESS_APP_LOGO_URL (optional HTTPS logo URL for Access App Launcher surfaces)
+- ACCESS_APP_LAUNCHER_VISIBLE (default: false)
 - ACCESS_POLICY_NAME (default: allow-invited-users)
 - ACCESS_SESSION_DURATION (default: 24h)
 - ACCESS_AUTO_REDIRECT (default: false)
@@ -82,3 +84,5 @@ Notes
 - Run in the same Cloudflare account that owns the Pages app, Worker, D1 database, and R2 bucket.
 - The D1 script updates `modules/backend/wrangler.jsonc` with the created or discovered database id before applying migrations.
 - Test the Access challenge in an incognito window at `/upload` after setup.
+- The text shown as `<app name> - Cloudflare Access` on the Access email login page comes from `ACCESS_APP_NAME`.
+- The large `Cloudflare Access` logo/header on the email login page is controlled globally in Zero Trust under Reusable components > Custom pages > Access login page, not by this repo's app code.
