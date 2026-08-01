@@ -88,53 +88,55 @@ body {
 }
 
 /* Typography: Negative letter-spacing at display sizes */
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-family: var(--font-display);
-  font-weight: 600;
-  margin: 0;
-}
+@layer base {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    margin: 0;
+  }
 
-h1 {
-  font-size: 56px;
-  line-height: 1.07;
-  letter-spacing: -0.28px;
-}
+  h1 {
+    font-size: 56px;
+    line-height: 1.07;
+    letter-spacing: -0.28px;
+  }
 
-h2 {
-  font-size: 40px;
-  line-height: 1.1;
-  letter-spacing: 0;
-}
+  h2 {
+    font-size: 40px;
+    line-height: 1.1;
+    letter-spacing: 0;
+  }
 
-h3 {
-  font-size: 34px;
-  line-height: 1.47;
-  letter-spacing: -0.374px;
-}
+  h3 {
+    font-size: 34px;
+    line-height: 1.47;
+    letter-spacing: -0.374px;
+  }
 
-p {
-  margin: 0;
-  font-size: 17px;
-  line-height: 1.47;
-  letter-spacing: -0.374px;
-}
+  p {
+    margin: 0;
+    font-size: 17px;
+    line-height: 1.47;
+    letter-spacing: -0.374px;
+  }
 
-a {
-  color: rgb(var(--color-primary));
-  text-decoration: none;
-  transition: color 150ms ease-out;
-}
+  a {
+    color: rgb(var(--color-primary));
+    text-decoration: none;
+    transition: color 150ms ease-out;
+  }
 
-a:hover {
-  color: rgb(var(--color-primary-focus));
-}
+  a:hover {
+    color: rgb(var(--color-primary-focus));
+  }
 
-button {
-  font-family: var(--font-sans);
-  cursor: pointer;
+  button {
+    font-family: var(--font-sans);
+    cursor: pointer;
+  }
 }

@@ -50,7 +50,7 @@
 </GlobalNav>
 
 <SubNav>
-  <span class="text-tagline text-body">{sectionLabel}</span>
+  <h1 class="text-tagline text-body m-0 text-sm font-medium leading-none">{sectionLabel}</h1>
   {#snippet cta()}
     <div class="flex items-center gap-6">
       <a href="/upload" class="text-sm font-medium text-body hover:text-primary">
