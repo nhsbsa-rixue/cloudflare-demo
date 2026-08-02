@@ -62,6 +62,15 @@
         Sign out
       </a>
     </div>
+  {:else}
+    <div class="ml-auto flex shrink-0 items-center">
+      <a
+        href={dev ? "/dev-login" : "/dashboard"}
+        class="text-xs font-medium text-body-on-dark hover:text-primary-on-dark transition-colors duration-150"
+      >
+        Sign in
+      </a>
+    </div>
   {/if}
 </GlobalNav>
 
@@ -72,15 +81,14 @@
       <a href="/about" class="text-sm font-medium text-body hover:text-primary">
         About
       </a>
-      <a href="/upload" class="text-sm font-medium text-body hover:text-primary">
-        Upload
-      </a>
-      <a
-        href="/dashboard"
-        class="text-sm font-medium text-body hover:text-primary"
-      >
-        Dashboard
-      </a>
+      {#if data.authenticatedUser}
+        <a href="/upload" class="text-sm font-medium text-body hover:text-primary">
+          Upload
+        </a>
+        <a href="/dashboard" class="text-sm font-medium text-body hover:text-primary">
+          Dashboard
+        </a>
+      {/if}
     </div>
   {/snippet}
 </SubNav>
