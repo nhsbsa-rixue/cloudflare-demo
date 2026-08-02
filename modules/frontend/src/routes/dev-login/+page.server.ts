@@ -1,7 +1,20 @@
 import { dev } from '$app/environment';
 import { error, fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import { DEV_MOCK_USER_COOKIE, DEV_SIGNED_OUT_SENTINEL, KNOWN_DEV_USERS } from '$lib/server/dev-auth';
+import { DEV_MOCK_USER_COOKIE, DEV_SIGNED_OUT_SENTINEL, type DevUserOption } from '$lib/server/dev-auth';
+
+const WORKER_DEV_USERS_URL = 'http://127.0.0.1:8787/api/dev/users';
+
+async function loadDevUsers(): Promise<DevUserOption[]> {
+  try {
+    const res = await fetch(WORKER_DEV_USERS_URL);
+    if (!res.ok) return [];
+    const data = (await res.json()) as { users: { email: string; name: string; role: string }[] };
+    return data.users.map((u) => ({ email: u.email, label: `${u.name} (${u.role})` }));
+  } catch {
+    return [];
+  }
+}
 
 function assertDev(): void {
   if (!dev) {
@@ -14,11 +27,12 @@ export const load: PageServerLoad = async ({ cookies }) => {
 
   const cookieValue = cookies.get(DEV_MOCK_USER_COOKIE) ?? null;
   const signedOut = cookieValue === DEV_SIGNED_OUT_SENTINEL;
-  const currentEmail = signedOut ? null : (cookieValue ?? KNOWN_DEV_USERS[0]?.email ?? null);
+  const knownUsers = await loadDevUsers();
+  const currentEmail = signedOut ? null : (cookieValue ?? knownUsers[0]?.email ?? null);
 
   return {
     currentEmail,
-    knownUsers: KNOWN_DEV_USERS
+    knownUsers
   };
 };
 
@@ -31,7 +45,8 @@ export const actions: Actions = {
       .trim()
       .toLowerCase();
 
-    const isKnownUser = KNOWN_DEV_USERS.some((user) => user.email === email);
+    const knownUsers = await loadDevUsers();
+    const isKnownUser = knownUsers.some((user) => user.email === email);
     if (!isKnownUser) {
       return fail(400, { message: 'Unknown dev user' });
     }

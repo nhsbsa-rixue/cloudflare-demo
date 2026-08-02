@@ -29,7 +29,11 @@ function detailUrl(upload: UploadResult): string {
 }
 
 // This runs on the server (Cloudflare Pages edge) — never exposed to the browser.
-export const load: PageServerLoad = async () => {
+export const load: PageServerLoad = async ({ parent }) => {
+  const { authenticatedUser } = await parent();
+  if (authenticatedUser?.role === 'guest') {
+    redirect(303, '/access-denied');
+  }
   return {
     upload: null,
     error: null

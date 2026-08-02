@@ -81,7 +81,7 @@
       <a href="/about" class="text-sm font-medium text-body hover:text-primary">
         About
       </a>
-      {#if data.authenticatedUser}
+      {#if data.authenticatedUser && data.authenticatedUser.role !== 'guest'}
         <a href="/upload" class="text-sm font-medium text-body hover:text-primary">
           Upload
         </a>

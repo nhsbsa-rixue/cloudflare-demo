@@ -19,13 +19,3 @@ export interface DevUserOption {
   email: string;
   label: string;
 }
-
-/**
- * Users available to sign in as locally. Must stay in sync with the seeded
- * rows in modules/database/drizzle/0003_seed_demo_user.sql (and any future
- * seed migrations) since the backend rejects emails that aren't in D1.
- */
-export const KNOWN_DEV_USERS: readonly DevUserOption[] = [
-  { email: 'demo@dongyu.com', label: 'Demo User (user)' },
-  { email: 'operator@dongyu.com', label: 'Demo Operator (operator)' }
-];

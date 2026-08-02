@@ -1,3 +1,4 @@
+import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { dev } from '$app/environment';
 import { buildForwardedAuthHeaders } from '$lib/server/auth';
@@ -15,7 +16,11 @@ function normalizeRole(value: string | null | undefined): AppUserRole {
   return 'user';
 }
 
-export const load: PageServerLoad = async ({ request, url, platform, fetch }) => {
+export const load: PageServerLoad = async ({ request, url, platform, fetch, parent }) => {
+  const { authenticatedUser } = await parent();
+  if (authenticatedUser?.role === 'guest') {
+    redirect(303, '/access-denied');
+  }
   const requestedPage = Number.parseInt(url.searchParams.get('page') ?? '1', 10);
   const page = Number.isFinite(requestedPage) && requestedPage > 0 ? requestedPage : 1;
   const search = url.searchParams.get('search')?.trim() ?? '';

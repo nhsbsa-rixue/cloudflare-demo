@@ -16,6 +16,7 @@ const PATH_UPLOAD = '/api/upload';
 const PATH_CASES = '/api/cases';
 const PATH_FILES = '/api/files';
 const PATH_AUTH_ME = '/api/auth/me';
+const PATH_DEV_USERS = '/api/dev/users';
 
 const ACCESS_EMAIL_HEADER = 'CF-Access-Authenticated-User-Email';
 const FORWARDED_EMAIL_HEADER = 'X-Authenticated-User-Email';
@@ -316,6 +317,22 @@ export default {
     }
 
     if (pathname === PATH_FILES) {
+      return errorJson('Method Not Allowed', 405);
+    }
+
+    if (pathname === PATH_DEV_USERS && method === 'GET') {
+      const usersService = new UsersService(env);
+      const result = await usersService.getAllUsers();
+      if (!result.ok) {
+        return errorJson(result.error.message, 500);
+      }
+      return Response.json(
+        { users: result.value.map((u) => ({ email: u.email, name: u.name, role: u.role })) },
+        { headers: withCorsHeaders() }
+      );
+    }
+
+    if (pathname === PATH_DEV_USERS) {
       return errorJson('Method Not Allowed', 405);
     }
 

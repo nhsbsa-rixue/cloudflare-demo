@@ -45,7 +45,7 @@ export const load: LayoutServerLoad = async ({ request, platform, fetch, locals,
       : await platform?.env?.WORKER?.fetch(WORKER_AUTH_ME_URL, { headers });
 
     if (!response || !response.ok) {
-      if (response?.status === 403 && !PUBLIC_PATHS.has(url.pathname)) {
+      if (response?.status === 403 && url.pathname !== '/access-denied') {
         redirect(303, '/access-denied');
       }
       return {
