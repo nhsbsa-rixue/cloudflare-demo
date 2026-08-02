@@ -30,6 +30,21 @@ function readCookieValue(request: Request, name: string): string | null {
   return null;
 }
 
+// CF Access only injects the email header on protected paths; the JWT cookie is domain-wide.
+function getEmailFromCfJwtCookie(request: Request): string | null {
+  const token = readCookieValue(request, 'CF_Authorization');
+  if (!token) return null;
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3 || !parts[1]) return null;
+    const payload = JSON.parse(atob(parts[1])) as { email?: unknown; exp?: unknown };
+    if (typeof payload.exp === 'number' && payload.exp < Math.floor(Date.now() / 1000)) return null;
+    return normalizeEmail(typeof payload.email === 'string' ? payload.email : null);
+  } catch {
+    return null;
+  }
+}
+
 export function getAuthenticatedEmailFromRequest(request: Request): string | null {
   const accessEmail = normalizeEmail(request.headers.get(ACCESS_EMAIL_HEADER));
   if (accessEmail) {
@@ -53,7 +68,7 @@ export function getAuthenticatedEmailFromRequest(request: Request): string | nul
     return DEV_FALLBACK_EMAIL;
   }
 
-  return null;
+  return getEmailFromCfJwtCookie(request);
 }
 
 export function buildForwardedAuthHeaders(request: Request): Headers {

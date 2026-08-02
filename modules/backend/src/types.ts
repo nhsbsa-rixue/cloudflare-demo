@@ -37,7 +37,7 @@ export interface UpdateCaseInput {
 export interface CreateUserInput {
   name: string;
   email: string;
-  role?: 'admin' | 'user' | 'operator' | 'editor';
+  role?: 'admin' | 'user' | 'operator' | 'editor' | 'guest';
 }
 
 export interface GetAllUsersOptions {

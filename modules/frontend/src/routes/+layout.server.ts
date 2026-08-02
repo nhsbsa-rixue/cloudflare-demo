@@ -6,9 +6,6 @@ import type { AppUserRole, WorkerAuthMeResponse } from '$lib/types';
 
 const WORKER_AUTH_ME_URL = 'http://127.0.0.1:8787/api/auth/me';
 
-// Pages that do not require a whitelisted D1 account.
-const PUBLIC_PATHS = new Set(['/', '/about', '/access-denied']);
-
 const VALID_ROLES: ReadonlySet<string> = new Set(['admin', 'user', 'operator', 'editor', 'guest']);
 
 function normalizeRole(value: string | null | undefined): AppUserRole {

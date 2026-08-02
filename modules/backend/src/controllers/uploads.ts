@@ -20,7 +20,6 @@ const PATH_DEV_USERS = '/api/dev/users';
 
 const ACCESS_EMAIL_HEADER = 'CF-Access-Authenticated-User-Email';
 const FORWARDED_EMAIL_HEADER = 'X-Authenticated-User-Email';
-const VALID_ROLES = new Set(['admin', 'user', 'operator', 'editor', 'guest']);
 
 const ALL_CASE_STATUSES = ['draft', 'active', 'completed', 'archived'] as const;
 type CaseStatus = (typeof ALL_CASE_STATUSES)[number];
@@ -63,9 +62,15 @@ async function requireActor(request: Request, env: Env): Promise<{ actor?: Authe
     return { response: errorJson(userResult.error.message, 500) };
   }
 
-  const user = userResult.value;
+  let user = userResult.value;
   if (!user) {
-    return { response: errorJson('Access denied: your email is not authorized', 403) };
+    // First-time login: auto-register the OTP-verified email as a guest.
+    const name = (email.split('@')[0] ?? email).replace(/[._-]+/g, ' ');
+    const createResult = await usersService.createUser({ name, email, role: 'guest' });
+    if (!createResult.ok) {
+      return { response: errorJson(createResult.error.message, 500) };
+    }
+    user = createResult.value;
   }
 
   return {

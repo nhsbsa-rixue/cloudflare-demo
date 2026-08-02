@@ -186,7 +186,7 @@ export class CasesHelper {
     if (userId) {
       conditions.push(eq(cases.userId, userId));
     }
-    if (search && search.trim()) {
+    if (search?.trim()) {
       conditions.push(like(cases.id, `%${search.trim()}%`));
     }
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;

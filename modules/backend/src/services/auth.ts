@@ -1,4 +1,3 @@
-
 const VALID_ROLES = new Set(['admin', 'user', 'operator', 'editor', 'guest']);
 
 export type AppRole = 'admin' | 'user' | 'operator' | 'editor' | 'guest';

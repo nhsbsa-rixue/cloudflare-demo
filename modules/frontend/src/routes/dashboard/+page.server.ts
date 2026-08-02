@@ -19,7 +19,7 @@ function normalizeRole(value: string | null | undefined): AppUserRole {
 export const load: PageServerLoad = async ({ request, url, platform, fetch, parent }) => {
   const { authenticatedUser } = await parent();
   if (authenticatedUser?.role === 'guest') {
-    redirect(303, '/access-denied');
+    redirect(303, '/about');
   }
   const requestedPage = Number.parseInt(url.searchParams.get('page') ?? '1', 10);
   const page = Number.isFinite(requestedPage) && requestedPage > 0 ? requestedPage : 1;
