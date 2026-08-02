@@ -3,8 +3,7 @@
 </script>
 
 <svelte:head>
-  <title>About Us</title>
+  <title>Dongyu Engineering Consultancy</title>
 </svelte:head>
 
 <AboutPage />
-

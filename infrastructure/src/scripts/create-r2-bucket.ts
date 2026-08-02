@@ -5,7 +5,7 @@ import { loadEnvFile, requireEnv } from '../lib/env.ts';
 import { runCommand, runCommandOutput } from '../lib/run.ts';
 
 const packageDir = process.cwd();
-const rootDir = path.resolve(packageDir, '../..');
+const rootDir = path.resolve(packageDir, '..');
 const envFile = process.argv[2] ?? process.env.BOOTSTRAP_ENV_FILE ?? path.join(rootDir, 'infrastructure/.env');
 
 if (!existsSync(envFile)) {

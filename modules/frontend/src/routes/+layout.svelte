@@ -27,6 +27,8 @@
       ? page.status === 404
         ? "Not found"
         : "Error"
+      : page.url.pathname === "/"
+        ? "About"
       : page.url.pathname.startsWith("/dashboard")
         ? "Dashboard"
         : page.url.pathname.startsWith("/upload")
@@ -67,6 +69,9 @@
   <h1 class="text-tagline text-body m-0 text-sm font-medium leading-none">{sectionLabel}</h1>
   {#snippet cta()}
     <div class="flex items-center gap-6">
+      <a href="/about" class="text-sm font-medium text-body hover:text-primary">
+        About
+      </a>
       <a href="/upload" class="text-sm font-medium text-body hover:text-primary">
         Upload
       </a>
