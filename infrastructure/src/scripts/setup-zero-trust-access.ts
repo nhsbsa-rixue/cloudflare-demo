@@ -129,6 +129,17 @@ async function resolveExistingAppId(domain: string, configuredAppId: string): Pr
   return '';
 }
 
+// Removes leftover domain-wide apps (no path) that would gate the public home page.
+async function removeDomainWideApps(): Promise<void> {
+  for await (const app of client.zeroTrust.access.applications.list({ account_id: accountId })) {
+    const a = app as { id?: string; domain?: string; name?: string };
+    if (a.domain === appDomain && a.id) {
+      console.log(`Removing domain-wide Access app: ${a.name ?? a.id} (${a.domain})`);
+      await client.zeroTrust.access.applications.delete(a.id, { account_id: accountId });
+    }
+  }
+}
+
 async function upsertPolicy(appId: string): Promise<void> {
   console.log(`Resolving policy by name for app ${appId}: ${policyName}`);
 
@@ -165,6 +176,8 @@ async function upsertPolicy(appId: string): Promise<void> {
 
 console.log(`Configuring path-scoped Access apps for hostname: ${appDomain}`);
 console.log(`Protected paths: ${protectedPathList.join(', ')}`);
+
+await removeDomainWideApps();
 
 const provisionedApps: Array<{ appId: string; name: string; domain: string }> = [];
 
