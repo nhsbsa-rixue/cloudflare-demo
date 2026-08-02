@@ -55,6 +55,8 @@
       "modules/*/vitest.config.ts",
       "modules/*/svelte.config.js",
       "modules/*/package.json",
+      "infrastructure/src/**/*.ts",
+      "infrastructure/package.json",
       "package.json",
       "pnpm-workspace.yaml"
     ]

@@ -6,7 +6,7 @@ import { runCommand } from '../lib/run.ts';
 
 const packageDir = process.cwd();
 const rootDir = path.resolve(packageDir, '../..');
-const envFile = process.argv[2] ?? process.env.BOOTSTRAP_ENV_FILE ?? path.join(rootDir, 'infrastructure/scripts/.env');
+const envFile = process.argv[2] ?? process.env.BOOTSTRAP_ENV_FILE ?? path.join(rootDir, 'infrastructure/.env');
 
 if (!existsSync(envFile)) {
   throw new Error(`Missing .env file: ${envFile}`);

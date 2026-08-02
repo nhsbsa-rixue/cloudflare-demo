@@ -16,3 +16,22 @@ export function runCommand(command: string, args: string[], options: { cwd: stri
     throw new Error(`${command} ${args.join(' ')} exited with code ${String(result.status ?? 'unknown')}`);
   }
 }
+
+// Returns captured stdout; throws on non-zero exit.
+export function runCommandOutput(command: string, args: string[], options: { cwd: string }): string {
+  const result = spawnSync(command, args, {
+    cwd: options.cwd,
+    stdio: ['ignore', 'pipe', 'pipe'],
+    encoding: 'utf8'
+  });
+
+  if (result.error) {
+    throw result.error;
+  }
+
+  if (result.status !== 0) {
+    throw new Error(`${command} ${args.join(' ')} exited with code ${String(result.status ?? 'unknown')}`);
+  }
+
+  return result.stdout ?? '';
+}
