@@ -1,6 +1,6 @@
 <script lang="ts">
   import { fly } from "svelte/transition";
-  import { cubicOut } from "svelte/easing";
+  import { rise } from "$lib/motion";
   import type { PageData } from "./$types";
   import { Badge } from "$lib/components/ui/badge/index.js";
   import {
@@ -15,13 +15,6 @@
   const file = $derived(data.file);
   const detail = $derived(data.detail);
   const title = $derived(`Design ${detail.id}`);
-
-  const rise = (delay: number) => ({
-    y: 16,
-    duration: 600,
-    delay,
-    easing: cubicOut,
-  });
 
   const statusLabels: Record<string, string> = {
     draft: "Draft",

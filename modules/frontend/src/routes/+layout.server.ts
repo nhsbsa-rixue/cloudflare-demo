@@ -2,9 +2,8 @@ import { dev } from '$app/environment';
 import { redirect } from '@sveltejs/kit';
 import type { LayoutServerLoad } from './$types';
 import { buildForwardedAuthHeaders, displayNameFromEmail } from '$lib/server/auth';
+import { WORKER_AUTH_ME_URL, fetchWorker } from '$lib/server/worker';
 import type { AppUserRole, WorkerAuthMeResponse } from '$lib/types';
-
-const WORKER_AUTH_ME_URL = 'http://127.0.0.1:8787/api/auth/me';
 
 const VALID_ROLES: ReadonlySet<string> = new Set(['admin', 'user', 'operator', 'editor', 'guest']);
 
@@ -37,9 +36,7 @@ export const load: LayoutServerLoad = async ({ request, platform, fetch, locals,
 
   try {
     const headers = buildForwardedAuthHeaders(request);
-    const response = dev
-      ? await fetch(WORKER_AUTH_ME_URL, { headers })
-      : await platform?.env?.WORKER?.fetch(WORKER_AUTH_ME_URL, { headers });
+    const response = await fetchWorker(dev, platform, fetch, WORKER_AUTH_ME_URL, { headers });
 
     if (!response || !response.ok) {
       if (response?.status === 403 && url.pathname !== '/access-denied') {

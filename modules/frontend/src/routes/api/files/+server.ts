@@ -2,10 +2,7 @@ import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { dev } from '$app/environment';
 import { buildForwardedAuthHeaders } from '$lib/server/auth';
-
-// Worker origin used in local dev; in production the request is routed through
-// the `WORKER` service binding, where the host portion is ignored.
-const WORKER_FILES_URL = 'http://127.0.0.1:8787/api/files';
+import { WORKER_FILES_URL, fetchWorker } from '$lib/server/worker';
 
 /**
  * Streams a case's stored design file from the backend worker so the browser
@@ -26,7 +23,7 @@ export const GET: RequestHandler = async ({ request, url, platform, fetch }) => 
   let response: Response | undefined;
   try {
     const headers = buildForwardedAuthHeaders(request);
-    response = dev ? await fetch(target, { headers }) : await platform?.env?.WORKER?.fetch(target, { headers });
+    response = await fetchWorker(dev, platform, fetch, target, { headers });
   } catch {
     throw error(503, 'File service currently unavailable');
   }

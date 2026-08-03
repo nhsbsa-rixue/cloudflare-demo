@@ -107,3 +107,12 @@ export interface DesignDetailView {
   file: UploadResult;
   detail: DesignDetail;
 }
+
+/** Human-readable labels for each app role, shared by nav and dashboard. */
+export const roleLabels: Record<AppUserRole, string> = {
+  admin: 'Admin',
+  user: 'User',
+  operator: 'Operator',
+  editor: 'Editor',
+  guest: 'Guest'
+};

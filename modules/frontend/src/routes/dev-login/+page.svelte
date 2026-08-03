@@ -1,6 +1,6 @@
 <script lang="ts">
   import { fly } from "svelte/transition";
-  import { cubicOut } from "svelte/easing";
+  import { rise } from "$lib/motion";
   import { Card } from "$lib/components/ui/card/index.js";
   import { Heading, Text, Caption } from "$lib/components/ui/typography/index.js";
   import { Button } from "$lib/components/ui/button/index.js";
@@ -21,7 +21,6 @@
     selectedEmail = data.currentEmail ?? data.knownUsers[0]?.email ?? "";
   });
 
-  const rise = (delay: number) => ({ y: 16, duration: 600, delay, easing: cubicOut });
 </script>
 
 <svelte:head>

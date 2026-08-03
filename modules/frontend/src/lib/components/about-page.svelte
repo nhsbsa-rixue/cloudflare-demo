@@ -1,10 +1,9 @@
 <script lang="ts">
   import { fly } from 'svelte/transition';
-  import { cubicOut } from 'svelte/easing';
+  import { rise } from '$lib/motion';
   import { Card } from '$lib/components/ui/card/index.js';
   import { Heading, Lead, Text } from '$lib/components/ui/typography/index.js';
 
-  const rise = (delay: number) => ({ y: 16, duration: 600, delay, easing: cubicOut });
 </script>
 
 <main class="min-h-screen bg-canvas-parchment flex items-center justify-center px-6 py-16">

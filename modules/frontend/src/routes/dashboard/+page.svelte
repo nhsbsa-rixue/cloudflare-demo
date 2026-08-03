@@ -2,7 +2,7 @@
   import type { PageData } from "./$types";
   import { goto } from "$app/navigation";
   import { fly } from "svelte/transition";
-  import { cubicOut } from "svelte/easing";
+  import { rise } from "$lib/motion";
   import PlusIcon from "@lucide/svelte/icons/plus";
   import { Button } from "$lib/components/ui/button/index.js";
   import {
@@ -10,18 +10,12 @@
     CardContent,
   } from "$lib/components/ui/card/index.js";
   import { Heading, Text, Caption } from "$lib/components/ui/typography/index.js";
-  import type { AppUserRole, CaseStatus, CaseType } from "$lib/types";
+  import type { CaseStatus, CaseType } from "$lib/types";
+  import { roleLabels } from "$lib/types";
 
   let { data }: { data: PageData } = $props();
 
   const title = "Cases · Dashboard";
-
-  const rise = (delay: number) => ({
-    y: 16,
-    duration: 600,
-    delay,
-    easing: cubicOut,
-  });
 
   // --- Local, editable search state (kept in sync with the loaded query) ---
   // svelte-ignore state_referenced_locally
@@ -32,14 +26,6 @@
   const totalPages = $derived(Math.max(1, Math.ceil(data.total / data.pageSize)));
   const rangeStart = $derived(data.total === 0 ? 0 : (data.page - 1) * data.pageSize + 1);
   const rangeEnd = $derived(Math.min(data.page * data.pageSize, data.total));
-
-  const roleLabels: Record<AppUserRole, string> = {
-    admin: "Admin",
-    user: "User",
-    operator: "Operator",
-    editor: "Editor",
-    guest: "Guest",
-  };
 
   const typeLabels: Record<CaseType, string> = {
     cnc: "CNC",
@@ -120,6 +106,26 @@
     return Number.isNaN(parsed.getTime()) ? "—" : dateFormatter.format(parsed);
   }
 </script>
+
+<!-- Download icon, shared by the desktop table and mobile card. -->
+{#snippet downloadIcon()}
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+    <polyline points="7 10 12 15 17 10" />
+    <line x1="12" x2="12" y1="15" y2="3" />
+  </svg>
+{/snippet}
 
 <svelte:head>
   <title>{title}</title>
@@ -312,22 +318,7 @@
                       onclick={(e) => e.stopPropagation()}
                       class="inline-flex items-center gap-1.5 rounded-md border border-hairline bg-surface-pearl px-3 py-2 text-sm font-medium text-ink-muted-80 transition-colors hover:bg-hairline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                     >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        aria-hidden="true"
-                      >
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                        <polyline points="7 10 12 15 17 10" />
-                        <line x1="12" x2="12" y1="15" y2="3" />
-                      </svg>
+                      {@render downloadIcon()}
                       Download
                     </a>
                   </td>
@@ -381,22 +372,7 @@
                     onclick={(e) => e.stopPropagation()}
                     class="mt-1 inline-flex w-full items-center justify-center gap-1.5 rounded-md border border-hairline bg-surface-pearl px-3 py-2.5 text-sm font-medium text-ink-muted-80 transition-colors hover:bg-hairline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                   >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      aria-hidden="true"
-                    >
-                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                      <polyline points="7 10 12 15 17 10" />
-                      <line x1="12" x2="12" y1="15" y2="3" />
-                    </svg>
+                    {@render downloadIcon()}
                     Download design
                   </a>
                 </CardContent>

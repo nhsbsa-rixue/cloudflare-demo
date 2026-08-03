@@ -78,7 +78,7 @@ export class CasesHelper {
       let query = this.db.select().from(cases).$dynamic();
 
       if (options?.status) {
-        query = query.where(eq(cases.status, options.status as 'draft' | 'active' | 'completed' | 'archived'));
+        query = query.where(eq(cases.status, options.status as CaseStatus));
       }
 
       if (options?.limit) {
@@ -110,12 +110,7 @@ export class CasesHelper {
       let query = this.db.select().from(cases).where(eq(cases.userId, userId)).$dynamic();
 
       if (options?.status) {
-        query = query.where(
-          and(
-            eq(cases.userId, userId),
-            eq(cases.status, options.status as 'draft' | 'active' | 'completed' | 'archived')
-          )
-        );
+        query = query.where(and(eq(cases.userId, userId), eq(cases.status, options.status as CaseStatus)));
       }
 
       if (options?.limit) {
@@ -242,7 +237,7 @@ export class CasesHelper {
       let query = this.db
         .select()
         .from(cases)
-        .where(and(eq(cases.userId, userId), eq(cases.status, status as 'draft' | 'active' | 'completed' | 'archived')))
+        .where(and(eq(cases.userId, userId), eq(cases.status, status as CaseStatus)))
         .$dynamic();
 
       if (options?.limit) {

@@ -1,5 +1,6 @@
 import { dev } from '$app/environment';
 import { DEV_MOCK_USER_COOKIE, DEV_SIGNED_OUT_SENTINEL } from './dev-auth';
+import { WORKER_AUTH_ME_URL } from './worker';
 
 const ACCESS_EMAIL_HEADER = 'CF-Access-Authenticated-User-Email';
 const FORWARDED_EMAIL_HEADER = 'X-Authenticated-User-Email';
@@ -93,8 +94,6 @@ interface RootBootstrapContext {
     };
   };
 }
-
-const WORKER_AUTH_ME_URL = 'http://127.0.0.1:8787/api/auth/me';
 
 export async function bootstrapAuthUser(context: RootBootstrapContext): Promise<void> {
   const headers = buildForwardedAuthHeaders(context.request);

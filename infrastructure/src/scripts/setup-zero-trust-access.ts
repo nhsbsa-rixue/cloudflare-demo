@@ -1,23 +1,8 @@
-import { existsSync } from 'node:fs';
-import path from 'node:path';
-
 import Cloudflare from 'cloudflare';
 
-import { loadEnvFile, requireEnv } from '../lib/env.ts';
+import { loadScriptEnv, requireEnv } from '../lib/env.ts';
 
-const packageDir = process.cwd();
-const rootDir = path.resolve(packageDir, '..');
-const envFile = process.argv[2] ?? process.env.ACCESS_ENV_FILE ?? path.join(rootDir, 'infrastructure/.env');
-
-if (!existsSync(envFile)) {
-  throw new Error(`Missing .env file: ${envFile}`);
-}
-
-const env = loadEnvFile(envFile);
-
-for (const [key, value] of Object.entries(env)) {
-  process.env[key] = value;
-}
+const { env } = loadScriptEnv('ACCESS_ENV_FILE');
 
 const apiToken = requireEnv(env, 'CLOUDFLARE_API_TOKEN');
 const accountId = requireEnv(env, 'CF_ACCOUNT_ID');

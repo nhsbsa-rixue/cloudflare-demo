@@ -3,7 +3,8 @@
   import { page } from "$app/state";
   import { dev } from "$app/environment";
   import { GlobalNav, SubNav } from "$lib/components/ui/nav/index.js";
-  import type { AppUserRole, AuthenticatedUser } from "$lib/types";
+  import type { AuthenticatedUser } from "$lib/types";
+  import { roleLabels } from "$lib/types";
 
   interface Props {
     data: {
@@ -13,14 +14,6 @@
   }
 
   let { data, children }: Props = $props();
-
-  const roleLabels: Record<AppUserRole, string> = {
-    admin: "Admin",
-    user: "User",
-    operator: "Operator",
-    editor: "Editor",
-    guest: "Guest",
-  };
 
   const sectionLabel = $derived(
     page.error

@@ -5,22 +5,31 @@ export interface Env {
   UPLOAD_API_KEY?: string;
 }
 
+/** Case classification. */
+export type CaseType = 'cnc' | '3d' | 'other';
+
+/** Lifecycle status persisted for a case. */
+export type CaseStatus = 'draft' | 'active' | 'completed' | 'archived';
+
+/** App roles persisted in the users table. */
+export type UserRole = 'admin' | 'user' | 'operator' | 'editor' | 'guest';
+
 export interface CreateCaseInput {
   id: string;
   userId: string;
   imageUrl: string;
-  type: 'cnc' | '3d' | 'other';
-  status?: 'draft' | 'active' | 'completed' | 'archived';
+  type: CaseType;
+  status?: CaseStatus;
 }
 
 export interface GetUserCasesOptions {
   limit?: number;
   offset?: number;
-  status?: 'draft' | 'active' | 'completed' | 'archived';
+  status?: CaseStatus;
 }
 
 export interface ListCasesOptions {
-  statuses?: Array<'draft' | 'active' | 'completed' | 'archived'>;
+  statuses?: Array<CaseStatus>;
   userId?: string;
   search?: string;
   limit?: number;
@@ -30,14 +39,14 @@ export interface ListCasesOptions {
 export interface UpdateCaseInput {
   userId?: string;
   imageUrl?: string;
-  type?: 'cnc' | '3d' | 'other';
-  status?: 'draft' | 'active' | 'completed' | 'archived';
+  type?: CaseType;
+  status?: CaseStatus;
 }
 
 export interface CreateUserInput {
   name: string;
   email: string;
-  role?: 'admin' | 'user' | 'operator' | 'editor' | 'guest';
+  role?: UserRole;
 }
 
 export interface GetAllUsersOptions {

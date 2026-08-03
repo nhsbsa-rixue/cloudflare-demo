@@ -2,9 +2,8 @@ import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { dev } from '$app/environment';
 import { buildForwardedAuthHeaders } from '$lib/server/auth';
+import { WORKER_UPLOAD_URL, resolveUploadApiKey } from '$lib/server/worker';
 import type { UploadResult, WorkerUploadResponse } from '$lib/types';
-
-const LOCAL_UPLOAD_URL = 'http://127.0.0.1:8787/api/upload?type=cnc';
 
 /**
  * Derive a case id from the R2 object key.
@@ -80,8 +79,7 @@ export const actions: Actions = {
       const body = new FormData();
       body.append('file', uploadedFile, uploadedFile.name);
 
-      const apiKey =
-        (platform?.env?.['x-api-key'] as string) || (platform?.env?.UPLOAD_API_KEY as string) || 'demo-key-12345';
+      const apiKey = resolveUploadApiKey(platform);
       const headers = buildForwardedAuthHeaders(request);
       headers.set('X-API-Key', apiKey);
 
@@ -92,8 +90,8 @@ export const actions: Actions = {
       };
 
       const response = dev
-        ? await fetch(LOCAL_UPLOAD_URL, requestInit)
-        : await platform?.env.WORKER?.fetch(LOCAL_UPLOAD_URL, requestInit);
+        ? await fetch(WORKER_UPLOAD_URL, requestInit)
+        : await platform?.env.WORKER?.fetch(WORKER_UPLOAD_URL, requestInit);
 
       if (!response.ok) {
         const errorPayload = (await response.json().catch(() => null)) as { error?: string } | null;

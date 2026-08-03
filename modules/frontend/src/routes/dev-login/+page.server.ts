@@ -2,8 +2,7 @@ import { dev } from '$app/environment';
 import { error, fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { DEV_MOCK_USER_COOKIE, DEV_SIGNED_OUT_SENTINEL, type DevUserOption } from '$lib/server/dev-auth';
-
-const WORKER_DEV_USERS_URL = 'http://127.0.0.1:8787/api/dev/users';
+import { WORKER_DEV_USERS_URL } from '$lib/server/worker';
 
 async function loadDevUsers(): Promise<DevUserOption[]> {
   try {

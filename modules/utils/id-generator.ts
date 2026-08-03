@@ -1,13 +1,9 @@
-
-
 type CaseIdGeneratorOptions = {
   type?: string;
 };
 
 export const caseIdGenerator = (type: string = "cnc", options: CaseIdGeneratorOptions = {}): string => {
   const now = new Date();
-
-  now.toDateString();
   const year = now.getFullYear();
   const month = String(now.getMonth() + 1).padStart(2, "0");
   const day = String(now.getDate()).padStart(2, "0");
@@ -18,4 +14,4 @@ export const caseIdGenerator = (type: string = "cnc", options: CaseIdGeneratorOp
 
 export const userIdGenerator = (): string => {
   return crypto.randomUUID();
-}
+};

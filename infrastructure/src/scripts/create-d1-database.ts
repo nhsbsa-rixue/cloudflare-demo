@@ -1,22 +1,10 @@
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 
-import { loadEnvFile, requireEnv } from '../lib/env.ts';
+import { loadScriptEnv, requireEnv } from '../lib/env.ts';
 import { runCommand, runCommandOutput } from '../lib/run.ts';
+import { updateWranglerFields } from '../lib/wrangler.ts';
 
-const packageDir = process.cwd();
-const rootDir = path.resolve(packageDir, '..');
-const envFile = process.argv[2] ?? process.env.BOOTSTRAP_ENV_FILE ?? path.join(rootDir, 'infrastructure/.env');
-
-if (!existsSync(envFile)) {
-  throw new Error(`Missing .env file: ${envFile}`);
-}
-
-const env = loadEnvFile(envFile);
-
-for (const [key, value] of Object.entries(env)) {
-  process.env[key] = value;
-}
+const { env, rootDir } = loadScriptEnv('BOOTSTRAP_ENV_FILE');
 
 requireEnv(env, 'CLOUDFLARE_API_TOKEN');
 requireEnv(env, 'CF_ACCOUNT_ID');
@@ -36,20 +24,6 @@ function extractUuid(output: string): string {
   return match[0];
 }
 
-function updateWranglerConfig(databaseId: string): void {
-  let text = readFileSync(wranglerConfig, 'utf8');
-
-  const namePattern = /("database_name"\s*:\s*")[^"]*(")/;
-  const idPattern = /("database_id"\s*:\s*")[^"]*(")/;
-
-  if (!namePattern.test(text)) throw new Error(`Could not find database_name in ${wranglerConfig}`);
-  if (!idPattern.test(text)) throw new Error(`Could not find database_id in ${wranglerConfig}`);
-
-  text = text.replace(namePattern, `$1${d1DatabaseName}$2`);
-  text = text.replace(idPattern, `$1${databaseId}$2`);
-  writeFileSync(wranglerConfig, text);
-}
-
 let databaseId: string;
 
 try {
@@ -67,7 +41,7 @@ try {
 }
 
 console.log(`Updating backend wrangler config: ${wranglerConfig}`);
-updateWranglerConfig(databaseId);
+updateWranglerFields(wranglerConfig, { database_name: d1DatabaseName, database_id: databaseId });
 
 console.log(`Applying remote migrations for ${d1DatabaseName}`);
 runCommand('pnpm', ['exec', 'wrangler', 'd1', 'migrations', 'apply', d1DatabaseName, '--remote'], {

@@ -1,4 +1,5 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
+import path from 'node:path';
 
 export type EnvMap = Record<string, string>;
 
@@ -37,4 +38,27 @@ export function requireEnv(env: EnvMap, key: string): string {
   }
 
   return value;
+}
+
+/**
+ * Resolve and load the script's .env file, then mirror every value into
+ * `process.env`. The env file is taken from argv[2], then the given override
+ * variable (e.g. BOOTSTRAP_ENV_FILE / ACCESS_ENV_FILE), then infrastructure/.env.
+ */
+export function loadScriptEnv(overrideEnvVar: string): { env: EnvMap; rootDir: string } {
+  const packageDir = process.cwd();
+  const rootDir = path.resolve(packageDir, '..');
+  const envFile = process.argv[2] ?? process.env[overrideEnvVar] ?? path.join(rootDir, 'infrastructure/.env');
+
+  if (!existsSync(envFile)) {
+    throw new Error(`Missing .env file: ${envFile}`);
+  }
+
+  const env = loadEnvFile(envFile);
+
+  for (const [key, value] of Object.entries(env)) {
+    process.env[key] = value;
+  }
+
+  return { env, rootDir };
 }

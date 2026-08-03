@@ -2,11 +2,9 @@ import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { dev } from '$app/environment';
 import { buildForwardedAuthHeaders } from '$lib/server/auth';
+import { WORKER_CASES_URL, fetchWorker } from '$lib/server/worker';
 import type { AppUserRole, WorkerCasesResponse } from '$lib/types';
 
-// Worker origin used in local dev; in production requests are routed through the
-// `WORKER` service binding, where the host portion is ignored.
-const WORKER_CASES_URL = 'http://127.0.0.1:8787/api/cases';
 const PAGE_SIZE = 10;
 
 function normalizeRole(value: string | null | undefined): AppUserRole {
@@ -50,7 +48,7 @@ export const load: PageServerLoad = async ({ request, url, platform, fetch, pare
 
   try {
     const headers = buildForwardedAuthHeaders(request);
-    const response = dev ? await fetch(target, { headers }) : await platform?.env?.WORKER?.fetch(target, { headers });
+    const response = await fetchWorker(dev, platform, fetch, target, { headers });
 
     if (!response || !response.ok) {
       return { ...empty, error: 'Unable to load cases' };
