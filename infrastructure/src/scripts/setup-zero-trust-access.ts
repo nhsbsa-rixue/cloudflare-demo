@@ -36,7 +36,7 @@ function normalizePath(value: string): string {
   const withLeadingSlash = trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
 
   let end = withLeadingSlash.length;
-  while (end > 0 && withLeadingSlash.charCodeAt(end - 1) === 47) {
+  while (end > 0 && withLeadingSlash.codePointAt(end - 1) === 47) {
     end -= 1;
   }
 
@@ -85,7 +85,12 @@ function parseExistingAppIds(value: string): Map<string, string> {
 }
 
 function buildAppDomain(hostname: string, protectedPath: string): string {
-  return `${hostname.replace(/\/+$/g, '')}${protectedPath}`;
+  let end = hostname.length;
+  while (end > 0 && hostname.codePointAt(end - 1) === 47) {
+    end -= 1;
+  }
+
+  return `${hostname.slice(0, end)}${protectedPath}`;
 }
 
 function buildAppName(baseName: string, protectedPath: string): string {
@@ -93,11 +98,13 @@ function buildAppName(baseName: string, protectedPath: string): string {
     return `${baseName}-root`;
   }
 
-  const slug = protectedPath
-    .slice(1)
-    .replace(/[^a-zA-Z0-9]+/g, '-')
-    .replace(/^-+/g, '')
-    .replace(/-+$/g, '');
+  let slug = protectedPath.slice(1).replace(/[^a-zA-Z0-9]+/g, '-').replace(/^-+/g, '');
+
+  let end = slug.length;
+  while (end > 0 && slug.codePointAt(end - 1) === 45) {
+    end -= 1;
+  }
+  slug = slug.slice(0, end);
 
   return slug ? `${baseName}-${slug}` : baseName;
 }

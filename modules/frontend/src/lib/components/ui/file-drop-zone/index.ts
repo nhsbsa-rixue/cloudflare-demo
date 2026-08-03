@@ -24,5 +24,5 @@ export const ACCEPT_IMAGE = 'image/*';
 export const ACCEPT_VIDEO = 'video/*';
 export const ACCEPT_AUDIO = 'audio/*';
 
-export { Root, Trigger, Textarea, type FileDropZoneRootProps };
-export type { FileRejectedReason } from './types';
+export { Root, Trigger, Textarea };
+export type { FileRejectedReason, FileDropZoneRootProps } from './types';
