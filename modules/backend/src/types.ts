@@ -5,14 +5,17 @@ export interface Env {
   UPLOAD_API_KEY?: string;
 }
 
-/** Case classification. */
-export type CaseType = 'cnc' | '3d' | 'other';
+/** Case classification. Single source for both the runtime list and the type. */
+export const CASE_TYPES = ['cnc', '3d', 'other'] as const;
+export type CaseType = (typeof CASE_TYPES)[number];
 
 /** Lifecycle status persisted for a case. */
-export type CaseStatus = 'draft' | 'active' | 'completed' | 'archived';
+export const CASE_STATUSES = ['draft', 'active', 'completed', 'archived'] as const;
+export type CaseStatus = (typeof CASE_STATUSES)[number];
 
 /** App roles persisted in the users table. */
-export type UserRole = 'admin' | 'user' | 'operator' | 'editor' | 'guest';
+export const USER_ROLES = ['admin', 'user', 'operator', 'editor', 'guest'] as const;
+export type UserRole = (typeof USER_ROLES)[number];
 
 export interface CreateCaseInput {
   id: string;

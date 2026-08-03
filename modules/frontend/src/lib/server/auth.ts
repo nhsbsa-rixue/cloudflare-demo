@@ -107,7 +107,4 @@ export async function bootstrapAuthUser(context: RootBootstrapContext): Promise<
   }
 }
 
-export function displayNameFromEmail(email: string): string {
-  const [localPart = email] = email.split('@');
-  return localPart.replace(/[._-]+/g, ' ');
-}
+export { displayNameFromEmail } from './user';

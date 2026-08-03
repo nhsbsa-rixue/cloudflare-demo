@@ -1,18 +1,10 @@
 import { dev } from '$app/environment';
 import { redirect } from '@sveltejs/kit';
 import type { LayoutServerLoad } from './$types';
-import { buildForwardedAuthHeaders, displayNameFromEmail } from '$lib/server/auth';
+import { buildForwardedAuthHeaders } from '$lib/server/auth';
 import { WORKER_AUTH_ME_URL, fetchWorker } from '$lib/server/worker';
-import type { AppUserRole, WorkerAuthMeResponse } from '$lib/types';
-
-const VALID_ROLES: ReadonlySet<string> = new Set(['admin', 'user', 'operator', 'editor', 'guest']);
-
-function normalizeRole(value: string | null | undefined): AppUserRole {
-  if (value && VALID_ROLES.has(value)) {
-    return value as AppUserRole;
-  }
-  return 'user';
-}
+import { fallbackUser, resolveWorkerUser } from '$lib/server/user';
+import type { WorkerAuthMeResponse } from '$lib/types';
 
 export const load: LayoutServerLoad = async ({ request, platform, fetch, locals, url }) => {
   const email = locals.authenticatedEmail;
@@ -25,12 +17,7 @@ export const load: LayoutServerLoad = async ({ request, platform, fetch, locals,
 
   if (!dev && !platform?.env?.WORKER) {
     return {
-      authenticatedUser: {
-        id: null,
-        email,
-        name: displayNameFromEmail(email),
-        role: 'user' as AppUserRole
-      }
+      authenticatedUser: fallbackUser(email)
     };
   }
 
@@ -43,34 +30,17 @@ export const load: LayoutServerLoad = async ({ request, platform, fetch, locals,
         redirect(303, '/access-denied');
       }
       return {
-        authenticatedUser: {
-          id: null,
-          email,
-          name: displayNameFromEmail(email),
-          role: 'user' as AppUserRole
-        }
+        authenticatedUser: fallbackUser(email)
       };
     }
 
     const payload = (await response.json()) as WorkerAuthMeResponse;
-    const user = payload.user;
-
     return {
-      authenticatedUser: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        role: normalizeRole(user.role)
-      }
+      authenticatedUser: resolveWorkerUser(payload.user)
     };
   } catch {
     return {
-      authenticatedUser: {
-        id: null,
-        email,
-        name: displayNameFromEmail(email),
-        role: 'user' as AppUserRole
-      }
+      authenticatedUser: fallbackUser(email)
     };
   }
 };

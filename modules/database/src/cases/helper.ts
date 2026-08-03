@@ -3,6 +3,7 @@ import { and, count, desc, eq, inArray, like } from 'drizzle-orm';
 import { cases, type NewCase, type Case } from './schema';
 import { users } from '../users/schema';
 import { DatabaseError, Ok, Err, type Result, type AppDatabase } from '../types';
+import { applyPagination, runQuery } from '../query-helpers';
 
 /** Allowed case status values, shared by filter helpers. */
 export type CaseStatus = 'draft' | 'active' | 'completed' | 'archived';
@@ -47,52 +48,36 @@ export class CasesHelper {
    * Create a new case
    */
   async insertCase(caseData: NewCase): Promise<Result<Case>> {
-    try {
+    return runQuery('Failed to insert case', 'INSERT_CASE_ERROR', async () => {
       const [inserted] = await this.db.insert(cases).values(caseData).returning();
-      if (!inserted) {
-        return Err(new DatabaseError('Failed to insert case'));
-      }
-      return Ok(inserted);
-    } catch (error) {
-      return Err(new DatabaseError('Failed to insert case', 'INSERT_CASE_ERROR', error));
-    }
+      return inserted ? Ok(inserted) : Err(new DatabaseError('Failed to insert case'));
+    });
   }
 
   /**
    * Get a single case by ID
    */
   async getCase(id: string): Promise<Result<Case | null>> {
-    try {
+    return runQuery('Failed to fetch case', 'GET_CASE_ERROR', async () => {
       const [found] = await this.db.select().from(cases).where(eq(cases.id, id));
       return Ok(found ?? null);
-    } catch (error) {
-      return Err(new DatabaseError('Failed to fetch case', 'GET_CASE_ERROR', error));
-    }
+    });
   }
 
   /**
    * Get all cases with optional filtering
    */
   async getAllCases(options?: { limit?: number; offset?: number; status?: string }): Promise<Result<Case[]>> {
-    try {
+    return runQuery('Failed to fetch all cases', 'GET_ALL_CASES_ERROR', async () => {
       let query = this.db.select().from(cases).$dynamic();
 
       if (options?.status) {
         query = query.where(eq(cases.status, options.status as CaseStatus));
       }
 
-      if (options?.limit) {
-        query = query.limit(options.limit);
-      }
-      if (options?.offset) {
-        query = query.offset(options.offset);
-      }
-
-      const result = await query;
-      return Ok(result);
-    } catch (error) {
-      return Err(new DatabaseError('Failed to fetch all cases', 'GET_ALL_CASES_ERROR', error));
-    }
+      query = applyPagination(query, options);
+      return Ok(await query);
+    });
   }
 
   /**
@@ -106,32 +91,23 @@ export class CasesHelper {
       status?: string;
     }
   ): Promise<Result<Case[]>> {
-    try {
+    return runQuery('Failed to fetch cases by user', 'GET_CASES_BY_USER_ERROR', async () => {
       let query = this.db.select().from(cases).where(eq(cases.userId, userId)).$dynamic();
 
       if (options?.status) {
         query = query.where(and(eq(cases.userId, userId), eq(cases.status, options.status as CaseStatus)));
       }
 
-      if (options?.limit) {
-        query = query.limit(options.limit);
-      }
-      if (options?.offset) {
-        query = query.offset(options.offset);
-      }
-
-      const result = await query;
-      return Ok(result);
-    } catch (error) {
-      return Err(new DatabaseError('Failed to fetch cases by user', 'GET_CASES_BY_USER_ERROR', error));
-    }
+      query = applyPagination(query, options);
+      return Ok(await query);
+    });
   }
 
   /**
    * Update a case
    */
   async updateCase(id: string, updates: Partial<Omit<Case, 'id' | 'createdAt'>>): Promise<Result<Case>> {
-    try {
+    return runQuery('Failed to update case', 'UPDATE_CASE_ERROR', async () => {
       const [updated] = await this.db
         .update(cases)
         .set({
@@ -141,25 +117,18 @@ export class CasesHelper {
         .where(eq(cases.id, id))
         .returning();
 
-      if (!updated) {
-        return Err(new DatabaseError('Case not found', 'CASE_NOT_FOUND'));
-      }
-      return Ok(updated);
-    } catch (error) {
-      return Err(new DatabaseError('Failed to update case', 'UPDATE_CASE_ERROR', error));
-    }
+      return updated ? Ok(updated) : Err(new DatabaseError('Case not found', 'CASE_NOT_FOUND'));
+    });
   }
 
   /**
    * Delete a case by ID
    */
   async deleteCase(id: string): Promise<Result<boolean>> {
-    try {
+    return runQuery('Failed to delete case', 'DELETE_CASE_ERROR', async () => {
       await this.db.delete(cases).where(eq(cases.id, id));
       return Ok(true);
-    } catch (error) {
-      return Err(new DatabaseError('Failed to delete case', 'DELETE_CASE_ERROR', error));
-    }
+    });
   }
 
   /**
@@ -186,7 +155,7 @@ export class CasesHelper {
     }
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
-    try {
+    return runQuery('Failed to fetch cases with user', 'GET_CASES_WITH_USER_ERROR', async () => {
       let query = this.db
         .select({
           id: cases.id,
@@ -217,9 +186,7 @@ export class CasesHelper {
       const [totals] = await this.db.select({ value: count() }).from(cases).where(whereClause);
 
       return Ok({ cases: rows, total: totals?.value ?? 0 });
-    } catch (error) {
-      return Err(new DatabaseError('Failed to fetch cases with user', 'GET_CASES_WITH_USER_ERROR', error));
-    }
+    });
   }
 
   /**
@@ -233,26 +200,15 @@ export class CasesHelper {
       offset?: number;
     }
   ): Promise<Result<Case[]>> {
-    try {
+    return runQuery('Failed to fetch cases by user and status', 'GET_CASES_BY_USER_AND_STATUS_ERROR', async () => {
       let query = this.db
         .select()
         .from(cases)
         .where(and(eq(cases.userId, userId), eq(cases.status, status as CaseStatus)))
         .$dynamic();
 
-      if (options?.limit) {
-        query = query.limit(options.limit);
-      }
-      if (options?.offset) {
-        query = query.offset(options.offset);
-      }
-
-      const result = await query;
-      return Ok(result);
-    } catch (error) {
-      return Err(
-        new DatabaseError('Failed to fetch cases by user and status', 'GET_CASES_BY_USER_AND_STATUS_ERROR', error)
-      );
-    }
+      query = applyPagination(query, options);
+      return Ok(await query);
+    });
   }
 }
