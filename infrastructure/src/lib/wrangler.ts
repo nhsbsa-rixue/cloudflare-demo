@@ -9,7 +9,7 @@ export function updateWranglerFields(configPath: string, fields: Record<string, 
   let text = readFileSync(configPath, 'utf8');
 
   for (const [key, value] of Object.entries(fields)) {
-    const pattern = new RegExp(`("${key}"\\s*:\\s*")[^"]*(")`);
+    const pattern = new RegExp(String.raw`("${key}"\s*:\s*")[^"]*(")`);
     if (!pattern.test(text)) {
       throw new Error(`Could not find ${key} in ${configPath}`);
     }

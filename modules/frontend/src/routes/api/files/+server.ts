@@ -2,7 +2,7 @@ import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { dev } from '$app/environment';
 import { buildForwardedAuthHeaders } from '$lib/server/auth';
-import { WORKER_FILES_URL, fetchWorker } from '$lib/server/worker';
+import { WORKER_FILES_URL, fetchWorkerFromBinding, fetchWorkerInDev } from '$lib/server/worker';
 
 /**
  * Streams a case's stored design file from the backend worker so the browser
@@ -23,7 +23,9 @@ export const GET: RequestHandler = async ({ request, url, platform, fetch }) => 
   let response: Response | undefined;
   try {
     const headers = buildForwardedAuthHeaders(request);
-    response = await fetchWorker(dev, platform, fetch, target, { headers });
+    response = dev
+      ? await fetchWorkerInDev(fetch, target, { headers })
+      : await fetchWorkerFromBinding(platform, target, { headers });
   } catch {
     throw error(503, 'File service currently unavailable');
   }

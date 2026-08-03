@@ -2,7 +2,7 @@ import { dev } from '$app/environment';
 import { redirect } from '@sveltejs/kit';
 import type { LayoutServerLoad } from './$types';
 import { buildForwardedAuthHeaders } from '$lib/server/auth';
-import { WORKER_AUTH_ME_URL, fetchWorker } from '$lib/server/worker';
+import { WORKER_AUTH_ME_URL, fetchWorkerFromBinding, fetchWorkerInDev } from '$lib/server/worker';
 import { fallbackUser, resolveWorkerUser } from '$lib/server/user';
 import type { WorkerAuthMeResponse } from '$lib/types';
 
@@ -23,9 +23,11 @@ export const load: LayoutServerLoad = async ({ request, platform, fetch, locals,
 
   try {
     const headers = buildForwardedAuthHeaders(request);
-    const response = await fetchWorker(dev, platform, fetch, WORKER_AUTH_ME_URL, { headers });
+    const response = dev
+      ? await fetchWorkerInDev(fetch, WORKER_AUTH_ME_URL, { headers })
+      : await fetchWorkerFromBinding(platform, WORKER_AUTH_ME_URL, { headers });
 
-    if (!response || !response.ok) {
+    if (!response?.ok) {
       if (response?.status === 403 && url.pathname !== '/access-denied') {
         redirect(303, '/access-denied');
       }

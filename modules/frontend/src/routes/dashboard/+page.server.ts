@@ -2,7 +2,7 @@ import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { dev } from '$app/environment';
 import { buildForwardedAuthHeaders } from '$lib/server/auth';
-import { WORKER_CASES_URL, fetchWorker } from '$lib/server/worker';
+import { WORKER_CASES_URL, fetchWorkerFromBinding, fetchWorkerInDev } from '$lib/server/worker';
 import type { AppUserRole, WorkerCasesResponse } from '$lib/types';
 
 const PAGE_SIZE = 10;
@@ -48,9 +48,11 @@ export const load: PageServerLoad = async ({ request, url, platform, fetch, pare
 
   try {
     const headers = buildForwardedAuthHeaders(request);
-    const response = await fetchWorker(dev, platform, fetch, target, { headers });
+    const response = dev
+      ? await fetchWorkerInDev(fetch, target, { headers })
+      : await fetchWorkerFromBinding(platform, target, { headers });
 
-    if (!response || !response.ok) {
+    if (!response?.ok) {
       return { ...empty, error: 'Unable to load cases' };
     }
     const payload = (await response.json()) as WorkerCasesResponse;

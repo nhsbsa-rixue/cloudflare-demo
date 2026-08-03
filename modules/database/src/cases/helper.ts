@@ -38,7 +38,7 @@ export interface GetCasesWithUserOptions {
  * Works with both Cloudflare D1 (production) and better-sqlite3 (local dev)
  */
 export class CasesHelper {
-  private db: AppDatabase;
+  private readonly db: AppDatabase;
 
   constructor(database: AppDatabase) {
     this.db = database;

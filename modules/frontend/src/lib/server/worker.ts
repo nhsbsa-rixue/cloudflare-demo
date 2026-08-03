@@ -25,19 +25,22 @@ interface WorkerPlatform {
   };
 }
 
-/**
- * Dispatch a request to the backend worker, using the platform service binding
- * in production and the provided `fetch` in dev. Returns `undefined` when no
- * worker binding is available (mirrors the previous inline behavior).
- */
-export function fetchWorker(
-  dev: boolean,
-  platform: WorkerPlatform | undefined,
+/** Dispatch a request directly via fetch, used for local dev origin calls. */
+export function fetchWorkerInDev(
   fetchFn: (input: string | Request | URL, init?: RequestInit) => Promise<Response>,
   url: string,
   init?: RequestInit
+): Promise<Response> {
+  return fetchFn(url, init);
+}
+
+/** Dispatch a request through the WORKER service binding in production. */
+export function fetchWorkerFromBinding(
+  platform: WorkerPlatform | undefined,
+  url: string,
+  init?: RequestInit
 ): Promise<Response> | undefined {
-  return dev ? fetchFn(url, init) : platform?.env?.WORKER?.fetch(url, init);
+  return platform?.env?.WORKER?.fetch(url, init);
 }
 
 /** Resolve the upload API key from the platform env, falling back to the demo key. */

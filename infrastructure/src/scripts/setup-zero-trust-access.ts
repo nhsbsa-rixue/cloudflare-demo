@@ -34,7 +34,13 @@ function normalizePath(value: string): string {
   }
 
   const withLeadingSlash = trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
-  return withLeadingSlash.replace(/\/+$/g, '') || '/';
+
+  let end = withLeadingSlash.length;
+  while (end > 0 && withLeadingSlash.charCodeAt(end - 1) === 47) {
+    end -= 1;
+  }
+
+  return withLeadingSlash.slice(0, end) || '/';
 }
 
 function parseProtectedPaths(value: string): string[] {
