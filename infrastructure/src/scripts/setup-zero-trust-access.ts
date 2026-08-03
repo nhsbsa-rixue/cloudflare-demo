@@ -34,7 +34,7 @@ function normalizePath(value: string): string {
   }
 
   const withLeadingSlash = trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
-  return withLeadingSlash.replace(/\/+$/, '') || '/';
+  return withLeadingSlash.replace(/\/+$/g, '') || '/';
 }
 
 function parseProtectedPaths(value: string): string[] {
@@ -79,7 +79,7 @@ function parseExistingAppIds(value: string): Map<string, string> {
 }
 
 function buildAppDomain(hostname: string, protectedPath: string): string {
-  return `${hostname.replace(/\/+$/, '')}${protectedPath}`;
+  return `${hostname.replace(/\/+$/g, '')}${protectedPath}`;
 }
 
 function buildAppName(baseName: string, protectedPath: string): string {
@@ -90,7 +90,8 @@ function buildAppName(baseName: string, protectedPath: string): string {
   const slug = protectedPath
     .slice(1)
     .replace(/[^a-zA-Z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
+    .replace(/^-+/g, '')
+    .replace(/-+$/g, '');
 
   return slug ? `${baseName}-${slug}` : baseName;
 }

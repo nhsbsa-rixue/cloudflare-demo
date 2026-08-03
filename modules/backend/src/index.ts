@@ -225,7 +225,7 @@ async function handleDownloadFile({ env, searchParams, actor }: AuthedContext): 
   const headers = new Headers();
   object.writeHttpMetadata(headers);
   headers.set('Content-Type', object.httpMetadata?.contentType || 'application/octet-stream');
-  headers.set('Content-Disposition', `attachment; filename="${filename.replace(/"/g, '')}"`);
+  headers.set('Content-Disposition', `attachment; filename="${filename.replaceAll('"', '')}"`);
   headers.set('Access-Control-Allow-Origin', '*');
 
   return new Response(object.body, { status: 200, headers });
