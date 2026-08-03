@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, realpathSync } from 'node:fs';
 import path from 'node:path';
 
 export type EnvMap = Record<string, string>;
@@ -40,6 +40,26 @@ export function requireEnv(env: EnvMap, key: string): string {
   return value;
 }
 
+function resolveSafeEnvFilePath(inputPath: string, rootDir: string): string {
+  const resolvedPath = path.resolve(rootDir, inputPath);
+  if (!existsSync(resolvedPath)) {
+    throw new Error(`Missing .env file: ${resolvedPath}`);
+  }
+
+  const canonicalRootDir = realpathSync(rootDir);
+  const canonicalEnvFilePath = realpathSync(resolvedPath);
+  const canonicalRootDirWithSep = canonicalRootDir.endsWith(path.sep)
+    ? canonicalRootDir
+    : `${canonicalRootDir}${path.sep}`;
+
+  // Prevent path traversal and symlink escapes outside the repository root.
+  if (canonicalEnvFilePath !== canonicalRootDir && !canonicalEnvFilePath.startsWith(canonicalRootDirWithSep)) {
+    throw new Error(`Env file path must stay within repository root: ${canonicalEnvFilePath}`);
+  }
+
+  return canonicalEnvFilePath;
+}
+
 /**
  * Resolve and load the script's .env file, then mirror every value into
  * `process.env`. The env file is taken from argv[2], then the given override
@@ -49,12 +69,9 @@ export function loadScriptEnv(overrideEnvVar: string): { env: EnvMap; rootDir: s
   const packageDir = process.cwd();
   const rootDir = path.resolve(packageDir, '..');
   const envFile = process.argv[2] ?? process.env[overrideEnvVar] ?? path.join(rootDir, 'infrastructure/.env');
+  const safeEnvFilePath = resolveSafeEnvFilePath(envFile, rootDir);
 
-  if (!existsSync(envFile)) {
-    throw new Error(`Missing .env file: ${envFile}`);
-  }
-
-  const env = loadEnvFile(envFile);
+  const env = loadEnvFile(safeEnvFilePath);
 
   for (const [key, value] of Object.entries(env)) {
     process.env[key] = value;
