@@ -18,7 +18,7 @@ for (const [key, value] of Object.entries(env)) {
   process.env[key] = value;
 }
 
-const apiToken = requireEnv(env, 'CF_API_TOKEN');
+const apiToken = requireEnv(env, 'CLOUDFLARE_API_TOKEN');
 const accountId = requireEnv(env, 'CF_ACCOUNT_ID');
 const apiKeyValue = requireEnv(env, 'X_API_KEY');
 
@@ -26,7 +26,7 @@ const frontendProjectName = env.FRONTEND_PROJECT_NAME ?? 'cloudflare-demo-web';
 const backendWorkerName = env.BACKEND_WORKER_NAME ?? 'cloudflare-demo-worker';
 const apiKeySecretName = env.API_KEY_SECRET_NAME ?? 'x-api-key';
 
-process.env.CF_API_TOKEN = apiToken;
+process.env.CLOUDFLARE_API_TOKEN = apiToken;
 process.env.CF_ACCOUNT_ID = accountId;
 
 console.log(`Updating Pages secret ${apiKeySecretName} for project ${frontendProjectName}`);

@@ -18,7 +18,7 @@ for (const [key, value] of Object.entries(env)) {
   process.env[key] = value;
 }
 
-requireEnv(env, 'CF_API_TOKEN');
+requireEnv(env, 'CLOUDFLARE_API_TOKEN');
 requireEnv(env, 'CF_ACCOUNT_ID');
 
 const d1DatabaseName = env.D1_DATABASE_NAME ?? 'demo-db';

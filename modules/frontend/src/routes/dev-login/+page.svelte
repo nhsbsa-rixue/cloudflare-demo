@@ -15,7 +15,7 @@
 
   const emailSelectId = "dev-login-email";
 
-  let selectedEmail = $state(data.currentEmail ?? data.knownUsers[0]?.email ?? "");
+  let selectedEmail = $state("");
 
   $effect(() => {
     selectedEmail = data.currentEmail ?? data.knownUsers[0]?.email ?? "";

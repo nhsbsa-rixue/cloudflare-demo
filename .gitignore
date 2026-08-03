@@ -14,7 +14,8 @@ pnpm-debug.log*
 # visual studio code
 .history/
 launch.json
-.vscode/
+.vscode/*
+!.vscode/settings.json
 
 
 # Build output

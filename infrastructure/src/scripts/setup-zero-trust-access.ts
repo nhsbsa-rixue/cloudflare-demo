@@ -19,7 +19,7 @@ for (const [key, value] of Object.entries(env)) {
   process.env[key] = value;
 }
 
-const apiToken = requireEnv(env, 'CF_API_TOKEN');
+const apiToken = requireEnv(env, 'CLOUDFLARE_API_TOKEN');
 const accountId = requireEnv(env, 'CF_ACCOUNT_ID');
 const appDomain = requireEnv(env, 'ACCESS_APP_DOMAIN');
 
@@ -27,9 +27,7 @@ const appName = env.ACCESS_APP_NAME ?? 'cloudflare-demo-web-access';
 const policyName = env.ACCESS_POLICY_NAME ?? 'allow-all-users';
 const sessionDuration = env.ACCESS_SESSION_DURATION ?? '24h';
 const autoRedirect = (env.ACCESS_AUTO_REDIRECT ?? 'false') === 'true';
-const protectedPathList = parseProtectedPaths(
-  env.ACCESS_PROTECTED_PATHS ?? '/upload,/dashboard,/design,/api/files'
-);
+const protectedPathList = parseProtectedPaths(env.ACCESS_PROTECTED_PATHS ?? '/upload,/dashboard,/design,/api/files');
 const existingAppIds = parseExistingAppIds(env.ACCESS_APP_IDS ?? env.APP_ID ?? '');
 
 const client = new Cloudflare({ apiToken });
