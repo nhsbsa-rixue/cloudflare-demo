@@ -43,4 +43,4 @@ jobs:
           args: >-
             -Dsonar.organization=nhsbsa-rixue
             -Dsonar.projectKey=cloudflare-demo
-            -Dsonar.project.settings=.sonarcloud.properties
+            -Dproject.settings=.sonarcloud.properties
