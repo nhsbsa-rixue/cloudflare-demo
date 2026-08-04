@@ -1,7 +1,6 @@
 import Root from './file-drop-zone.svelte';
 import Trigger from './file-drop-zone-trigger.svelte';
 import Textarea from './file-drop-zone-textarea.svelte';
-import type { FileDropZoneRootProps } from './types';
 
 export function displaySize(bytes: number): string {
   if (bytes < KILOBYTE) return `${bytes.toFixed(0)} B`;

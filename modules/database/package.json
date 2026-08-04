@@ -15,6 +15,7 @@
     "migrate:generate": "drizzle-kit generate --config drizzle.config.ts",
     "migrate:local": "drizzle-kit migrate --config drizzle.config.ts",
     "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
     "lint": "biome check .",
     "format": "biome format --write ."
@@ -23,6 +24,7 @@
     "drizzle-orm": "^0.45.2"
   },
   "devDependencies": {
+    "@vitest/coverage-v8": "4.1.10",
     "@biomejs/biome": "2.2.0",
     "@types/better-sqlite3": "^7.6.11",
     "better-sqlite3": "^11.8.0",

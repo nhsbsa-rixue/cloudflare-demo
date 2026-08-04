@@ -27,6 +27,7 @@ export default defineConfig({
     clearMocks: true,
     coverage: {
       provider: 'v8',
+      reporter: ['text', 'lcov'],
       include: ['src/**/*.{js,ts,svelte}'],
       exclude: ['src/**/*.{test,spec}.{js,ts}', 'src/app.d.ts']
     }
