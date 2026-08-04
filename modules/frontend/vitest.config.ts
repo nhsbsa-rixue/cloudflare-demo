@@ -25,6 +25,9 @@ export default defineConfig({
     include: ['src/**/*.{test,spec}.{js,ts}'],
     globals: true,
     clearMocks: true,
+    reporters: process.env.CI
+      ? ['default', ['vitest-sonar-reporter', { outputFile: 'test-report.xml' }]]
+      : ['default'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'lcov'],

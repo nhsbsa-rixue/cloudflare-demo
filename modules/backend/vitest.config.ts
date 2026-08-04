@@ -9,6 +9,9 @@ export default defineConfig({
     exclude: ['dist/**', 'node_modules/**'],
     globals: true,
     passWithNoTests: true,
+    reporters: process.env.CI
+      ? ['default', ['vitest-sonar-reporter', { outputFile: 'test-report.xml' }]]
+      : ['default'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'lcov'],

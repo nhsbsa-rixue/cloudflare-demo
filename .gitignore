@@ -29,3 +29,6 @@ dist
 **/.DS_Store
 
 report
+
+# Sonar test execution reports
+test-report.xml

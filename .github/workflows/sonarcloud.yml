@@ -32,15 +32,13 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --ignore-scripts
 
-      - name: Generate coverage reports
+      - name: Generate coverage and test reports
         run: pnpm -r --filter "@cloudflare-demo/{backend,database,frontend}" test:coverage
 
       - name: SonarCloud Scan
-        uses: SonarSource/sonarqube-scan-action@v6
+        uses: SonarSource/sonarqube-scan-action@fd88b7d7ccbaefd23d8f36f73b59db7a3d246602 # v6
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >-
-            -Dsonar.organization=nhsbsa-rixue
-            -Dsonar.projectKey=cloudflare-demo
-            -Dproject.settings=.sonarcloud.properties
+            -Dsonar.qualitygate.wait=true
