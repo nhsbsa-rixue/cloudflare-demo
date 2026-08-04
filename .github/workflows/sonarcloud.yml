@@ -33,10 +33,10 @@ jobs:
         run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: Generate coverage reports
-        run: pnpm --filter @cloudflare-demo/backend test:coverage && pnpm --filter @cloudflare-demo/database test:coverage && pnpm --filter @cloudflare-demo/frontend test:coverage
+        run: pnpm -r --filter "@cloudflare-demo/{backend,database,frontend}" test:coverage
 
       - name: SonarCloud Scan
-        uses: SonarSource/sonarqube-scan-action@4c0e3f8f6c97a42f39926f0f9f132c8f4f34f94f # v4
+        uses: SonarSource/sonarqube-scan-action@v4
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
