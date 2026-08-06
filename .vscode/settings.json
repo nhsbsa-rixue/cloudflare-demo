@@ -8,5 +8,8 @@
     "search.exclude": {
         "**/node_modules": true
     },
-    "github.copilot.chat.agent.autoFix": false
+    "github.copilot.chat.agent.autoFix": false,
+    "chat.tools.terminal.autoApprove": {
+        "mkdir": true
+    }
 }

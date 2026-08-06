@@ -32,3 +32,4 @@ report
 
 # Sonar test execution reports
 test-report.xml
+.sonar/**

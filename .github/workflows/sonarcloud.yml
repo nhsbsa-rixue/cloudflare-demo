@@ -39,6 +39,14 @@ jobs:
       - name: Generate coverage and test reports
         run: pnpm -r --filter @cloudflare-demo/backend --filter @cloudflare-demo/database --filter @cloudflare-demo/frontend test:coverage
 
+      - name: Normalize coverage paths for Sonar
+        run: |
+          mkdir -p .sonar
+          sed 's|^SF:src/|SF:modules/backend/src/|' modules/backend/coverage/lcov.info > .sonar/backend.lcov.info
+          sed 's|^SF:src/|SF:modules/database/src/|' modules/database/coverage/lcov.info > .sonar/database.lcov.info
+          sed 's|^SF:src/|SF:modules/frontend/src/|' modules/frontend/coverage/lcov.info > .sonar/frontend.lcov.info
+          cat .sonar/backend.lcov.info .sonar/database.lcov.info .sonar/frontend.lcov.info > .sonar/lcov.info
+
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@fd88b7d7ccbaefd23d8f36f73b59db7a3d246602 # v6
         env:
@@ -48,4 +56,4 @@ jobs:
             -Dsonar.qualitygate.wait=false
             -Dsonar.sources=modules
             -Dsonar.exclusions=**/node_modules/**,**/coverage/**,**/.svelte-kit/**,**/dist/**,**/.wrangler/**
-            -Dsonar.javascript.lcov.reportPaths=modules/backend/coverage/lcov.info,modules/database/coverage/lcov.info,modules/frontend/coverage/lcov.info
+            -Dsonar.javascript.lcov.reportPaths=.sonar/lcov.info
