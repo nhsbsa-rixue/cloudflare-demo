@@ -40,9 +40,11 @@ export const actions: Actions = {
     assertDev();
 
     const formData = await request.formData();
-    const email = String(formData.get('email') ?? '')
-      .trim()
-      .toLowerCase();
+    const emailValue = formData.get('email');
+    if (typeof emailValue !== 'string') {
+      return fail(400, { message: 'Invalid email input' });
+    }
+    const email = emailValue.trim().toLowerCase();
 
     const knownUsers = await loadDevUsers();
     const isKnownUser = knownUsers.some((user) => user.email === email);

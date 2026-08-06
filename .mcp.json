@@ -1,0 +1,17 @@
+{
+  "servers": {
+    "sonarqube-mcp": {
+      "command": "docker",
+      "args": [
+        "run",
+        "--rm",
+        "-i",
+        "-e",
+        "SONARQUBE_TOKEN",
+        "-e",
+        "SONARQUBE_ORG",
+        "mcp/sonarqube"
+      ]
+    }
+  }
+}
