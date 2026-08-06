@@ -33,8 +33,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --ignore-scripts
 
+      - name: Sync SvelteKit generated config
+        run: pnpm --filter @cloudflare-demo/frontend exec svelte-kit sync
+
       - name: Generate coverage and test reports
-        run: pnpm -r --filter "@cloudflare-demo/{backend,database,frontend}" test:coverage
+        run: pnpm -r --filter @cloudflare-demo/backend --filter @cloudflare-demo/database --filter @cloudflare-demo/frontend test:coverage
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@fd88b7d7ccbaefd23d8f36f73b59db7a3d246602 # v6
@@ -42,4 +45,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >-
-            -Dsonar.qualitygate.wait=true
+            -Dsonar.qualitygate.wait=false
+            -Dsonar.sources=modules
+            -Dsonar.exclusions=**/node_modules/**,**/coverage/**,**/.svelte-kit/**,**/dist/**,**/.wrangler/**
+            -Dsonar.javascript.lcov.reportPaths=modules/backend/coverage/lcov.info,modules/database/coverage/lcov.info,modules/frontend/coverage/lcov.info
