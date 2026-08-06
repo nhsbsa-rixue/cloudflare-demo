@@ -26,7 +26,18 @@ export default defineConfig({
     globals: true,
     clearMocks: true,
     reporters: process.env.CI
-      ? ['default', ['vitest-sonar-reporter', { outputFile: 'test-report.xml' }]]
+      ? [
+          'default',
+          [
+            'vitest-sonar-reporter',
+            {
+              outputFile: 'test-report.xml',
+              onWritePath(path: string) {
+                return `modules/frontend/${path}`;
+              }
+            }
+          ]
+        ]
       : ['default'],
     coverage: {
       provider: 'v8',
