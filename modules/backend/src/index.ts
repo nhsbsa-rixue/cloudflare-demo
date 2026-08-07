@@ -140,24 +140,17 @@ async function handleUpload({ request, env, searchParams, actor }: AuthedContext
 
     // Step 3 — Trigger the AnalyseWorkflow; non-fatal so upload still succeeds on failure
     let workflowInstanceId: string | undefined;
-    let workflowStatus: string | undefined;
     try {
       const wfInstance = await env.ANALYSE_WORKFLOW.create({
         params: { caseId, imageKey: result.key, uploadedAt, actorId: actor.id }
       });
       workflowInstanceId = wfInstance.id;
-      const wfStatus = await wfInstance.status();
-      workflowStatus = wfStatus.status;
-      if (wfStatus.status === 'errored') {
-        logger.error({ workflowInstanceId, error: wfStatus.error }, '[analyse-workflow] errored');
-      } else {
-        logger.info({ workflowInstanceId, workflowStatus }, '[analyse-workflow] triggered');
-      }
+      logger.info({ workflowInstanceId }, '[analyse-workflow] triggered');
     } catch (err) {
       logger.error({ err }, `[analyse-workflow] failed to trigger for caseId=${caseId}`);
     }
 
-    return jsonResponse({ ...payload, workflowInstanceId, workflowStatus });
+    return jsonResponse({ ...payload, workflowInstanceId });
   } catch (error) {
     if (error instanceof R2UploadError) {
       return errorJson(error.message, error.status);
