@@ -9,6 +9,8 @@
         "**/node_modules": true
     },
     "chat.tools.terminal.autoApprove": {
-        "test": true
+        "test": true,
+        "uv": true,
+        "uvx": true
     },
 }

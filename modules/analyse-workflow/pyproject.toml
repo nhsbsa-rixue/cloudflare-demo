@@ -7,6 +7,28 @@ dependencies = []
 
 [dependency-groups]
 dev = [
-    "workers-py",
+    # workers-runtime-sdk provides Workers type stubs for pyright
     "workers-runtime-sdk",
 ]
+
+[tool.ruff]
+line-length = 120
+indent-width = 4
+target-version = "py313"
+
+[tool.ruff.format]
+indent-style = "space"
+line-ending = "lf"
+quote-style = "double"
+
+[tool.ruff.lint]
+# F = pyflakes (unused imports/vars), E/W = pycodestyle errors/warnings
+select = ["E", "F", "W"]
+# mirror Biome: unused imports and variables are warnings, not errors
+extend-select = []
+# F401 unused import, F841 local var assigned but never used — treated as warnings via preview
+ignore = []
+
+[tool.ruff.lint.per-file-ignores]
+# allow unused imports in __init__ re-export files
+"__init__.py" = ["F401"]

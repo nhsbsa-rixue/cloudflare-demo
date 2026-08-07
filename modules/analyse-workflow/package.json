@@ -3,10 +3,15 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "wrangler dev",
-    "deploy": "wrangler deploy"
+    "setup": "uv sync && uvx --from workers-py pywrangler sync",
+    "dev": "node ../../scripts/find-available-port.js 8788 9230 wrangler",
+    "format": "uvx ruff format .",
+    "lint": "uvx ruff check .",
+    "check": "uvx pyright",
+    "build": "uv sync --frozen && uvx ruff format --check . && uvx ruff check . && uvx pyright && wrangler deploy --dry-run",
+    "deploy": "uv sync --frozen --no-dev --no-install-project && wrangler deploy"
   },
   "devDependencies": {
-    "wrangler": "^4.0.0"
+    "wrangler": "^4.120.0"
   }
 }

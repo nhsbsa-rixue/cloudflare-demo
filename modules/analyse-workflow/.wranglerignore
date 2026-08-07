@@ -1,0 +1,11 @@
+# Pyodide/Python runtime is built into workerd — none of these dirs belong in the bundle
+.venv/**
+.venv-workers/**
+python_modules/**
+
+# Exclude project metadata files
+pyproject.toml
+uv.lock
+package.json
+package-lock.json
+node_modules/

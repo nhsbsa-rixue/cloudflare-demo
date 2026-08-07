@@ -8,6 +8,7 @@
   },
   "scripts": {
     "dev": "pnpm -r --parallel dev",
+    "dev:workflow": "pnpm --filter @cloudflare-demo/analyse-workflow dev",
     "dev:backend": "pnpm --filter @cloudflare-demo/backend dev",
     "dev:frontend": "pnpm --filter @cloudflare-demo/frontend dev",
     "vite": "pnpm --filter @cloudflare-demo/frontend run vite",

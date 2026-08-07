@@ -22,8 +22,8 @@
     {
       "name": "analyse-workflow",
       "binding": "ANALYSE_WORKFLOW",
-      "class_name": "AnalyseWorkflow"
-      "script_name": "analyse-workflow",
+      "class_name": "AnalyseWorkflow",
+      "script_name": "analyse-workflow"
     }
   ],
   // Environment variables (non-secret, for development)
