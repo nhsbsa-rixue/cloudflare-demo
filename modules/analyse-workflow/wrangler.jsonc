@@ -1,0 +1,13 @@
+{
+  "name": "analyse-workflow",
+  "main": "workflow.py",
+  "compatibility_date": "2026-01-01",
+  "compatibility_flags": ["python_workers"],
+  "workflows": [
+    {
+      "name": "analyse-workflow",
+      "binding": "ANALYSE_WORKFLOW",
+      "class_name": "AnalyseWorkflow"
+    }
+  ]
+}

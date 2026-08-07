@@ -18,6 +18,14 @@
       "migrations_dir": "../database/drizzle"
     }
   ],
+    "workflows": [
+    {
+      "name": "analyse-workflow",
+      "binding": "ANALYSE_WORKFLOW",
+      "class_name": "AnalyseWorkflow"
+      "script_name": "analyse-workflow",
+    }
+  ],
   // Environment variables (non-secret, for development)
   "vars": {
   }

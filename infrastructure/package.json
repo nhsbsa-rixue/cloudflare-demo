@@ -8,6 +8,7 @@
     "bootstrap:database": "node --experimental-strip-types ./src/scripts/create-d1-database.ts",
     "bootstrap:r2": "node --experimental-strip-types ./src/scripts/create-r2-bucket.ts",
     "bootstrap:access": "node --experimental-strip-types ./src/scripts/setup-zero-trust-access.ts",
+    "bootstrap:workflow": "node --experimental-strip-types ./src/scripts/create-workflow.ts",
     "check": "tsc --noEmit",
     "lint": "biome check .",
     "format": "biome format --write ."

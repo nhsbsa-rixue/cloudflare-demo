@@ -12,7 +12,7 @@ import {
   parseStatuses,
   readAuthenticatedEmail
 } from './http';
-import { caseIdGenerator } from '../../utils';
+import { caseIdGenerator, logger } from '../../utils';
 
 const DEFAULT_ALLOWED_UPLOAD_TYPES = ['cnc'];
 const DEFAULT_PAGE_SIZE = 10;
@@ -122,9 +122,11 @@ async function handleUpload({ request, env, searchParams, actor }: AuthedContext
   const casesService = new CasesService(env);
 
   try {
+    // Step 1 — Upload the file to R2
     const result = await uploadService.upload({ file: fileData, caseId, uploadedAt });
     const payload: UploadSuccessResponse = { upload: result };
 
+    // Step 2 — Create a new case record in D1
     const createResult = await casesService.createCase({
       id: caseId,
       userId: actor.id,
@@ -136,7 +138,19 @@ async function handleUpload({ request, env, searchParams, actor }: AuthedContext
       return errorJson(createResult.error.message, 400);
     }
 
-    return jsonResponse(payload);
+    // Step 3 — Trigger the AnalyseWorkflow; non-fatal so upload still succeeds on failure
+    let workflowInstanceId: string | undefined;
+    try {
+      const wfInstance = await env.ANALYSE_WORKFLOW.create({
+        params: { caseId, imageKey: result.key, uploadedAt, actorId: actor.id }
+      });
+      workflowInstanceId = wfInstance.id;
+      logger.info(`[analyse-workflow] triggered instance=${workflowInstanceId} caseId=${caseId}`);
+    } catch (err) {
+      logger.error({ err }, `[analyse-workflow] failed to trigger for caseId=${caseId}`);
+    }
+
+    return jsonResponse({ ...payload, workflowInstanceId });
   } catch (error) {
     if (error instanceof R2UploadError) {
       return errorJson(error.message, error.status);

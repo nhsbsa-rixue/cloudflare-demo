@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@cloudflare-demo/database": "workspace:*",
+    "@cloudflare-demo/utils": "workspace:*",
     "drizzle-orm": "^0.45.2"
   },
   "devDependencies": {

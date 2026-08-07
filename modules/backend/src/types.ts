@@ -1,6 +1,7 @@
 export interface Env {
   UPLOADS_BUCKET: R2Bucket;
   UPLOADS_DB: D1Database;
+  ANALYSE_WORKFLOW: Workflow;
   'x-api-key'?: string;
   UPLOAD_API_KEY?: string;
 }

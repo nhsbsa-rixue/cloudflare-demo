@@ -98,7 +98,10 @@ function buildAppName(baseName: string, protectedPath: string): string {
     return `${baseName}-root`;
   }
 
-  let slug = protectedPath.slice(1).replace(/[^a-zA-Z0-9]+/g, '-').replace(/^-+/g, '');
+  let slug = protectedPath
+    .slice(1)
+    .replace(/[^a-zA-Z0-9]+/g, '-')
+    .replace(/^-+/g, '');
 
   let end = slug.length;
   while (end > 0 && slug.codePointAt(end - 1) === 45) {
