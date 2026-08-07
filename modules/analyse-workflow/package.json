@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "setup": "uv sync && uvx --from workers-py pywrangler sync",
-    "dev": "node ../../scripts/find-available-port.js 8788 9230 wrangler",
+    "dev": "node ../../scripts/find-available-port.js 8800 9250 \"pnpm exec wrangler\"",
     "format": "uvx ruff format .",
     "lint": "uvx ruff check .",
     "check": "uvx pyright",

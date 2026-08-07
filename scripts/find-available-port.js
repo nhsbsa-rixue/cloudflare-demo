@@ -52,12 +52,13 @@ async function main() {
 	const command = args[2] || "wrangler";
 
 	const availablePort = await findAvailablePort(startPort, 10);
+	const availableInspectorPort = await findAvailablePort(inspectorPort, 10);
 
-	console.log(`🚀 Starting ${command} on port ${availablePort}`);
+	console.log(`🚀 Starting ${command} on port ${availablePort} (inspector: ${availableInspectorPort})`);
 
 	// Run wrangler dev with the available port
 	try {
-		execSync(`${command} dev --port ${availablePort} --inspector-port ${inspectorPort}`, {
+		execSync(`${command} dev --port ${availablePort} --inspector-port ${availableInspectorPort}`, {
 			stdio: "inherit",
 			cwd: process.cwd(),
 		});
