@@ -14,7 +14,7 @@ const workflowBinding = env.WORKFLOW_BINDING ?? 'ANALYSE_WORKFLOW';
 const workflowClass = env.WORKFLOW_CLASS ?? 'AnalyseWorkflow';
 const workflowDir = env.WORKFLOW_DIR ?? path.join(rootDir, 'modules/analyse-workflow');
 const backendDir = env.BACKEND_DIR ?? path.join(rootDir, 'modules/backend');
-const wranglerConfig = env.BACKEND_WRANGLER_CONFIG ?? path.join(backendDir, 'wrangler.jsonc');
+const wranglerConfig = env.BACKEND_WRANGLER_CONFIG ?? path.join(backendDir, 'wrangler.toml');
 
 // Verify uv is installed — required to manage Python deps and deploy with pywrangler
 runCommandOutput('uv', ['--version'], { cwd: rootDir });

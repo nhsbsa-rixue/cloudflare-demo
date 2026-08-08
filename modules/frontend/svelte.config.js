@@ -10,7 +10,7 @@ const config = {
     adapter: adapter({
       // Wrangler config used for local binding emulation (platform.env)
       platformProxy: {
-        configPath: './wrangler.jsonc'
+        configPath: './wrangler.toml'
       }
     })
   }

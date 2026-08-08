@@ -12,7 +12,7 @@ requireEnv(env, 'CF_ACCOUNT_ID');
 const d1DatabaseName = env.D1_DATABASE_NAME ?? 'demo-db';
 const d1BindingName = env.D1_BINDING_NAME ?? 'UPLOADS_DB';
 const backendDir = env.BACKEND_DIR ?? path.join(rootDir, 'modules/backend');
-const wranglerConfig = env.BACKEND_WRANGLER_CONFIG ?? path.join(backendDir, 'wrangler.jsonc');
+const wranglerConfig = env.BACKEND_WRANGLER_CONFIG ?? path.join(backendDir, 'wrangler.toml');
 
 const uuidPattern = /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}/;
 

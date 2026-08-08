@@ -11,7 +11,7 @@ requireEnv(env, 'CF_ACCOUNT_ID');
 
 const r2BucketName = env.R2_BUCKET_NAME ?? 'files';
 const backendDir = env.BACKEND_DIR ?? path.join(rootDir, 'modules/backend');
-const wranglerConfig = env.BACKEND_WRANGLER_CONFIG ?? path.join(backendDir, 'wrangler.jsonc');
+const wranglerConfig = env.BACKEND_WRANGLER_CONFIG ?? path.join(backendDir, 'wrangler.toml');
 
 try {
   runCommandOutput('pnpm', ['exec', 'wrangler', 'r2', 'bucket', 'info', r2BucketName], { cwd: backendDir });

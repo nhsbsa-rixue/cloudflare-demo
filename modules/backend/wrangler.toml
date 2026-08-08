@@ -1,0 +1,26 @@
+name = "cloudflare-demo-worker"
+main = "src/index.ts"
+compatibility_date = "2026-01-01"
+# nodejs_compat gives access to Node.js built-ins (crypto, buffer, streams, etc.)
+compatibility_flags = ["nodejs_compat"]
+
+[observability]
+enabled = true
+
+[[r2_buckets]]
+binding = "UPLOADS_BUCKET"
+bucket_name = "files"
+
+[[d1_databases]]
+binding = "UPLOADS_DB"
+database_name = "demo-db"
+database_id = "31bf5672-0b0b-456d-bb7d-2e3cc1a28f46"
+migrations_dir = "../database/drizzle"
+
+[[workflows]]
+name = "analyse-workflow"
+binding = "ANALYSE_WORKFLOW"
+class_name = "AnalyseWorkflow"
+script_name = "analyse-workflow"
+
+[vars]
