@@ -4,6 +4,8 @@ compatibility_date = "2026-01-01"
 # nodejs_compat gives access to Node.js built-ins (crypto, buffer, streams, etc.)
 compatibility_flags = ["nodejs_compat"]
 
+logpush = true
+
 [observability]
 enabled = true
 
