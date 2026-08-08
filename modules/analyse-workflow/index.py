@@ -16,8 +16,9 @@ class AnalyseWorkflow(WorkflowEntrypoint):
                 instance_id_raw = event.instanceId
 
             # Convert JsProxy payload to a plain Python dict if needed.
+            # `.to_py()` is a Pyodide JsProxy method unknown to the type stubs.
             if hasattr(raw_payload, "to_py"):
-                payload = raw_payload.to_py()
+                payload = raw_payload.to_py()  # type: ignore[union-attr]
             elif isinstance(raw_payload, dict):
                 payload = raw_payload
             else:
